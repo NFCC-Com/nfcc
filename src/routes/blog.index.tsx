@@ -11,7 +11,7 @@ export const Route = createFileRoute('/blog/')({
       { title: 'Blog — NFCC' },
       {
         name: 'description',
-        content: 'Write-ups and field notes from NFCC workshops and CTFs.',
+        content: 'Write-up dan catatan lapangan dari workshop dan CTF NFCC.',
       },
     ],
   }),
@@ -24,18 +24,18 @@ function BlogIndex() {
     <section className="page-wrap py-20">
       <div className="eyebrow">Blog</div>
       <h1 className="display-title mt-2 text-4xl font-semibold sm:text-5xl">
-        Write-ups & field notes
+        Write-up & catatan lapangan
       </h1>
       <p className="mt-3 max-w-xl text-muted-foreground">
-        Methodology breakdowns from our workshops and CTFs — written to teach,
-        not to spoil.
+        Bedah metodologi dari workshop dan CTF kita — ditulis buat ngajarin,
+        bukan buat spoiler.
       </p>
       {posts.length === 0 ? (
         <p className="mt-10 text-muted-foreground">
-          No posts published yet. Check back soon.
+          Belum ada post yang dipublish. Cek lagi nanti ya.
         </p>
       ) : (
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {posts.map((post) => (
             <PostCard key={post.slug} post={post} />
           ))}

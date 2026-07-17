@@ -20,64 +20,99 @@ function Home() {
   const { posts, stats } = Route.useLoaderData()
 
   return (
-    <>
+    <div className="min-h-screen bg-background">
       <Hero />
       <StatsBand stats={stats} />
 
-      <section className="page-wrap py-20">
-        <div className="eyebrow">What we do</div>
-        <h2 className="display-title mt-2 text-3xl font-semibold sm:text-4xl">
-          Three ways to get your hands dirty
-        </h2>
-        <div className="mt-10 grid gap-5 sm:grid-cols-3">
-          {PROGRAMS.map((program) => (
-            <ProgramCard key={program.title} program={program} />
-          ))}
+      <section className="py-24 sm:py-28">
+        <div className="page-wrap">
+          <div className="max-w-xl">
+            <div className="eyebrow">Metodologi</div>
+            <h2 className="display-title mt-3 text-3xl font-semibold sm:text-4xl">
+              Apa yang kami lakukan
+            </h2>
+            <p className="mt-3 text-lg text-muted-foreground">
+              Tiga fokus utama untuk melatih kemampuan teknis keamanan siber secara nyata.
+            </p>
+          </div>
+          <div className="mt-4 border-t border-border sm:mt-6">
+            {PROGRAMS.map((program, index) => (
+              <ProgramCard key={program.title} program={program} index={index} />
+            ))}
+          </div>
         </div>
       </section>
 
       {posts.length > 0 && (
-        <section className="page-wrap py-20">
-          <div className="flex items-baseline justify-between gap-4">
-            <div>
-              <div className="eyebrow">Write-ups</div>
-              <h2 className="display-title mt-2 text-3xl font-semibold sm:text-4xl">
-                Latest from the blog
-              </h2>
+        <section className="border-t border-border bg-card py-24 sm:py-28">
+          <div className="page-wrap">
+            <div className="flex flex-wrap items-end justify-between gap-6">
+              <div className="max-w-xl">
+                <div className="eyebrow">Dari komunitas</div>
+                <h2 className="display-title mt-3 text-3xl font-semibold sm:text-4xl">
+                  Tulisan terbaru
+                </h2>
+                <p className="mt-3 text-lg text-muted-foreground">
+                  Catatan teknis dan pembahasan langsung dari anggota komunitas.
+                </p>
+              </div>
+              <Button asChild variant="ghost" className="hidden sm:inline-flex">
+                <Link to="/blog">
+                  Lihat semua
+                  <ArrowRightIcon className="ml-2 size-4" />
+                </Link>
+              </Button>
             </div>
-            <Button asChild variant="ghost" className="hidden sm:inline-flex">
+            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {posts.map((post) => (
+                <PostCard key={post.slug} post={post} />
+              ))}
+            </div>
+            <Button asChild variant="ghost" className="mt-8 w-full sm:hidden">
               <Link to="/blog">
-                All posts
-                <ArrowRightIcon className="size-4" />
+                Lihat semua tulisan
+                <ArrowRightIcon className="ml-2 size-4" />
               </Link>
             </Button>
-          </div>
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {posts.map((post) => (
-              <PostCard key={post.slug} post={post} />
-            ))}
           </div>
         </section>
       )}
 
-      <section className="band-dark py-20">
+      <section className="band-dark relative overflow-hidden">
         <div className="grid-texture" />
-        <div className="page-wrap relative flex flex-col items-center gap-4 text-center">
-          <h2 className="display-title text-3xl font-semibold sm:text-4xl">
-            Ready to start?
+        <div className="page-wrap relative py-24 text-center sm:py-28">
+          <div className="eyebrow">Gabung sekarang</div>
+          <h2 className="display-title mx-auto mt-4 max-w-2xl text-3xl font-semibold sm:text-4xl md:text-5xl">
+            Siap pahami cara kerja serangan sesungguhnya?
           </h2>
-          <p className="max-w-md text-white/65">
-            No prior experience required — just curiosity and a willingness to
-            break things legally.
+          <p className="mx-auto mt-4 max-w-xl text-lg text-white/70">
+            Terbuka untuk semua mahasiswa STT Terpadu Nurul Fikri. Tidak perlu
+            pengalaman sebelumnya, cukup rasa ingin tahu.
           </p>
-          <Button asChild size="lg" className="mt-2">
+          <Button asChild size="lg" className="mt-10">
             <Link to="/contact">
-              Join the community
-              <ArrowRightIcon className="size-4" />
+              Gabung komunitas
+              <ArrowRightIcon className="ml-2 size-4" />
             </Link>
           </Button>
         </div>
       </section>
-    </>
+
+      <section className="border-t border-border py-12">
+        <div className="page-wrap">
+          <p className="eyebrow text-center">Didukung oleh</p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
+            {['Kampus', 'Partner', 'Sponsor'].map((label) => (
+              <div
+                key={label}
+                className="flex h-11 w-32 items-center justify-center rounded-md border border-dashed border-border font-mono text-[0.65rem] tracking-wide text-muted-foreground/60 uppercase"
+              >
+                {label}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </div>
   )
 }

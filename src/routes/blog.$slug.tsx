@@ -1,4 +1,5 @@
-import { createFileRoute, notFound } from '@tanstack/react-router'
+import { createFileRoute, Link, notFound } from '@tanstack/react-router'
+import { ArrowLeftIcon } from 'lucide-react'
 
 import { Badge } from '#/components/ui/badge.tsx'
 import { getPublishedPost } from '#/server/content.ts'
@@ -21,7 +22,7 @@ export const Route = createFileRoute('/blog/$slug')({
 })
 
 function formatDate(date: string) {
-  return new Date(date).toLocaleDateString('en-US', {
+  return new Date(date).toLocaleDateString('id-ID', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -34,9 +35,16 @@ function BlogPost() {
   return (
     <article className="page-wrap py-20">
       <div className="mx-auto max-w-2xl">
+        <Link
+          to="/blog"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeftIcon className="size-4" />
+          Kembali ke blog
+        </Link>
         <time
           dateTime={post.date}
-          className="font-mono text-xs tracking-wide text-muted-foreground uppercase"
+          className="mt-6 block font-mono text-xs tracking-wide text-muted-foreground uppercase"
         >
           {formatDate(post.date)}
         </time>

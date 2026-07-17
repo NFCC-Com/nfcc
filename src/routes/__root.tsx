@@ -14,7 +14,7 @@ import { getSettings } from '#/server/content.ts'
 
 const SITE_TITLE = 'NFCC — Nurul Fikri Cybersecurity Community'
 const SITE_DESCRIPTION =
-  'Student-run cybersecurity community at STT Terpadu Nurul Fikri — offensive security workshops, CTFs, and boot-to-root sessions.'
+  'Komunitas cybersecurity mahasiswa STT Terpadu Nurul Fikri — workshop offensive security, CTF, dan sesi boot-to-root.'
 
 export const Route = createRootRoute({
   loader: () => getSettings(),
@@ -45,6 +45,19 @@ export const Route = createRootRoute({
         href: '/favicon.svg',
         type: 'image/svg+xml',
       },
+      {
+        rel: 'icon',
+        href: '/favicon.ico',
+        sizes: '32x32',
+      },
+      {
+        rel: 'apple-touch-icon',
+        href: '/apple-touch-icon.png',
+      },
+      {
+        rel: 'manifest',
+        href: '/manifest.json',
+      },
     ],
   }),
   shellComponent: RootDocument,
@@ -54,9 +67,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   const settings = Route.useLoaderData()
   const pathname = useRouterState({ select: (s) => s.location.pathname })
   const isDashboard = pathname.startsWith('/dashboard')
+  const hasDarkHero = ['/about', '/contact', '/gallery'].includes(pathname)
 
   return (
-    <html lang="en">
+    <html lang="id">
       <head>
         <HeadContent />
       </head>
@@ -65,7 +79,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           children
         ) : (
           <div className="flex min-h-screen flex-col">
-            <Header />
+            <Header darkHero={hasDarkHero} />
             <main className="flex-1">{children}</main>
             <Footer settings={settings} />
           </div>

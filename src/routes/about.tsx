@@ -12,11 +12,11 @@ export const Route = createFileRoute('/about')({
   },
   head: () => ({
     meta: [
-      { title: 'About — NFCC' },
+      { title: 'Tentang — NFCC' },
       {
         name: 'description',
         content:
-          'Mission, milestones, and the team behind Nurul Fikri Cybersecurity Community.',
+          'Misi, tonggak sejarah, dan tim di balik Nurul Fikri Cybersecurity Community.',
       },
     ],
   }),
@@ -32,15 +32,15 @@ function About() {
       <section className="band-dark py-20">
         <div className="grid-texture" />
         <div className="page-wrap relative">
-          <div className="eyebrow">About NFCC</div>
+          <div className="eyebrow">Tentang NFCC</div>
           <h1 className="display-title mt-2 max-w-2xl text-4xl font-semibold sm:text-5xl">
-            Practical security education, run by students, for students.
+            Edukasi keamanan praktis, dari mahasiswa, buat mahasiswa.
           </h1>
           <p className="mt-5 max-w-xl text-white/70">
-            NFCC exists so that learning offensive security doesn&apos;t require
-            guessing your way through YouTube tutorials alone. We run structured
-            workshops, CTFs, and boot-to-root sessions grounded in real
-            methodology — always legal, always hands-on.
+            NFCC hadir biar belajar offensive security gak cuma nebak-nebak
+            lewat tutorial YouTube doang. Kita ngadain workshop terstruktur,
+            CTF, dan sesi boot-to-root yang based on metodologi beneran —
+            legal, hands-on.
           </p>
         </div>
       </section>
@@ -48,25 +48,25 @@ function About() {
       <section className="page-wrap py-20">
         <div className="grid gap-12 md:grid-cols-2">
           <div>
-            <div className="eyebrow">Mission</div>
+            <div className="eyebrow">Misi</div>
             <h2 className="display-title mt-2 text-2xl font-semibold">
-              Why we exist
+              Kenapa kita ada
             </h2>
             <p className="mt-3 text-muted-foreground">
-              To give students at STT Terpadu Nurul Fikri a structured, hands-on
-              path into cybersecurity — closing the gap between classroom theory
-              and the way real attacks and defenses actually work.
+              Ngasih mahasiswa STT Terpadu Nurul Fikri jalur terstruktur dan
+              hands-on ke dunia cybersecurity — ngejembatanin celah antara teori
+              kelas sama cara kerja serangan dan pertahanan di dunia nyata.
             </p>
           </div>
           <div>
-            <div className="eyebrow">Vision</div>
+            <div className="eyebrow">Visi</div>
             <h2 className="display-title mt-2 text-2xl font-semibold">
-              Where we're headed
+              Arah yang dituju
             </h2>
             <p className="mt-3 text-muted-foreground">
-              A community strong enough to run its own CTF platform, mentor
-              newer members into specialists, and represent the campus at
-              national security competitions.
+              Jadi komunitas yang cukup kuat buat ngejalanin platform CTF
+              sendiri, mentori anggota baru jadi spesialis, dan ngewakilin
+              kampus di kompetisi keamanan nasional.
             </p>
           </div>
         </div>
@@ -74,9 +74,9 @@ function About() {
 
       {timeline.length > 0 && (
         <section className="page-wrap py-20">
-          <div className="eyebrow">Milestones</div>
+          <div className="eyebrow">Tonggak sejarah</div>
           <h2 className="display-title mt-2 text-3xl font-semibold sm:text-4xl">
-            How we got here
+            Perjalanan kita
           </h2>
           <div className="mt-10 max-w-2xl">
             {timeline.map((entry, index) => (
@@ -92,27 +92,32 @@ function About() {
 
       {team.length > 0 && (
         <section className="page-wrap py-20">
-          <div className="eyebrow">The team</div>
+          <div className="eyebrow">Tim</div>
           <h2 className="display-title mt-2 text-3xl font-semibold sm:text-4xl">
-            Who runs this
+            Yang ngurus ini semua
           </h2>
-          {divisions.map((division) => {
-            const members = team.filter(
-              (member) => member.division === division,
-            )
-            return (
-              <div key={division} className="mt-10">
-                <h3 className="font-mono text-xs tracking-wide text-muted-foreground uppercase">
-                  {division}
-                </h3>
-                <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                  {members.map((member) => (
-                    <TeamCard key={member.id} member={member} />
-                  ))}
+          <div className="mt-12 flex flex-col gap-12">
+            {divisions.map((division) => {
+              const members = team.filter(
+                (member) => member.division === division,
+              )
+              return (
+                <div key={division}>
+                  <div className="flex items-center gap-4">
+                    <h3 className="shrink-0 font-mono text-xs tracking-wide text-muted-foreground uppercase">
+                      {division}
+                    </h3>
+                    <div className="h-px flex-1 bg-border" />
+                  </div>
+                  <div className="mt-7 grid grid-cols-2 gap-x-4 gap-y-9 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                    {members.map((member) => (
+                      <TeamCard key={member.id} member={member} />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
         </section>
       )}
     </>

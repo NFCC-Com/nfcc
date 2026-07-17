@@ -15,9 +15,12 @@ import {
   TableRow,
 } from '#/components/ui/table.tsx'
 import { deletePost, listAllPosts } from '#/server/admin.ts'
+import { SkeletonTable } from '#/components/dashboard/skeletons.tsx'
 
 export const Route = createFileRoute('/dashboard/_authed/posts/')({
   component: PostsList,
+  pendingMs: 200,
+  pendingComponent: () => <SkeletonTable />,
   loader: () => listAllPosts(),
 })
 
@@ -27,20 +30,20 @@ function PostsList() {
 
   async function handleDelete(id: number) {
     await deletePost({ data: id })
-    toast.success('Post deleted')
+    toast.success('Post dihapus')
     router.invalidate()
   }
 
   return (
     <div>
       <PageHeader
-        title="Blog posts"
-        description="Write, edit, and publish write-ups."
+        title="Post blog"
+        description="Tulis, edit, dan publikasi write-up."
         action={
           <Button asChild>
             <Link to="/dashboard/posts/$id" params={{ id: 'new' }}>
               <PlusIcon className="size-4" />
-              New post
+              Post baru
             </Link>
           </Button>
         }
@@ -48,17 +51,17 @@ function PostsList() {
 
       {posts.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          No posts yet. Create your first one.
+          Belum ada post. Bikin yang pertama yuk.
         </p>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Title</TableHead>
+                <TableHead>Judul</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Updated</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>Diupdate</TableHead>
+                <TableHead className="text-right">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -67,13 +70,13 @@ function PostsList() {
                   <TableCell className="font-medium">{post.title}</TableCell>
                   <TableCell>
                     {post.published ? (
-                      <Badge>Published</Badge>
+                      <Badge>Publikasi</Badge>
                     ) : (
-                      <Badge variant="outline">Draft</Badge>
+                      <Badge variant="outline">Draf</Badge>
                     )}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {new Date(post.updatedAt).toLocaleDateString('en-US', {
+                    {new Date(post.updatedAt).toLocaleDateString('id-ID', {
                       year: 'numeric',
                       month: 'short',
                       day: 'numeric',
@@ -90,7 +93,7 @@ function PostsList() {
                         </Link>
                       </Button>
                       <ConfirmDelete
-                        title="Delete this post?"
+                        title="Hapus post ini?"
                         trigger={
                           <Button variant="ghost" size="icon-sm">
                             <Trash2Icon className="size-4 text-destructive" />

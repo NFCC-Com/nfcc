@@ -1,80 +1,95 @@
 import * as React from 'react'
 import { createFileRoute, useRouter } from '@tanstack/react-router'
-import { ShieldIcon } from 'lucide-react'
+import { useForm } from '@tanstack/react-form'
+import { z } from 'zod'
 
 import { Button } from '#/components/ui/button.tsx'
 import { Input } from '#/components/ui/input.tsx'
-import { Label } from '#/components/ui/label.tsx'
+import { FormField, fieldErrors } from '#/components/dashboard/form-field.tsx'
 import { signIn } from '#/server/admin.ts'
+
+const loginSchema = z.object({
+  email: z.string().email('Email yang valid ya'),
+  password: z.string().min(1, 'Password wajib diisi'),
+})
 
 export const Route = createFileRoute('/dashboard/login')({
   component: Login,
-  head: () => ({ meta: [{ title: 'Sign in — NFCC Admin' }] }),
+  head: () => ({ meta: [{ title: 'Login \u2014 NFCC Admin' }] }),
 })
 
 function Login() {
   const router = useRouter()
-  const [email, setEmail] = React.useState('')
-  const [password, setPassword] = React.useState('')
   const [error, setError] = React.useState<string | null>(null)
-  const [pending, setPending] = React.useState(false)
 
-  async function handleSubmit(event: React.FormEvent) {
-    event.preventDefault()
-    setPending(true)
-    setError(null)
-    const result = await signIn({ data: { email, password } })
-    setPending(false)
-    if (!result.ok) {
-      setError(result.error)
-      return
-    }
-    await router.navigate({ to: '/dashboard' })
-    router.invalidate()
-  }
+  const form = useForm({
+    defaultValues: { email: '', password: '' },
+    validators: { onChange: loginSchema },
+    onSubmit: async ({ value }) => {
+      setError(null)
+      const result = await signIn({ data: value })
+      if (!result.ok) {
+        setError(result.error)
+        return
+      }
+      await router.navigate({ to: '/dashboard' })
+      router.invalidate()
+    },
+  })
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
-          <span className="flex size-12 items-center justify-center rounded-xl bg-brand-navy text-brand-orange">
-            <ShieldIcon className="size-6" strokeWidth={2.25} />
-          </span>
+          <img src="/logo.png" alt="NFCC" className="size-12 rounded-xl" />
           <h1 className="display-title text-2xl font-semibold">NFCC Admin</h1>
           <p className="text-sm text-muted-foreground">
-            Sign in to manage the site.
+            Login buat ngelola situs.
           </p>
         </div>
 
         <form
-          onSubmit={handleSubmit}
+          onSubmit={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            void form.handleSubmit()
+          }}
           className="flex flex-col gap-4 rounded-xl border border-border bg-card p-6"
         >
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
+          <form.Field name="email" validators={{ onChange: z.string().email('Email yang valid ya') }}>
+            {(field) => (
+              <FormField label="Email" htmlFor="email" errors={fieldErrors(field)}>
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  onBlur={field.handleBlur}
+                />
+              </FormField>
+            )}
+          </form.Field>
+
+          <form.Field name="password" validators={{ onChange: z.string().min(1, 'Password wajib diisi') }}>
+            {(field) => (
+              <FormField label="Password" htmlFor="password" errors={fieldErrors(field)}>
+                <Input
+                  id="password"
+                  type="password"
+                  autoComplete="current-password"
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  onBlur={field.handleBlur}
+                />
+              </FormField>
+            )}
+          </form.Field>
+
           {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" disabled={pending}>
-            {pending ? 'Signing in…' : 'Sign in'}
+
+          <Button type="submit" disabled={form.state.isSubmitting}>
+            {form.state.isSubmitting ? 'Login\u2026' : 'Login'}
           </Button>
         </form>
       </div>

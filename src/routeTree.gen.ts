@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as GalleryRouteImport } from './routes/gallery'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as CodeRouteImport } from './routes/$code'
 import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
@@ -22,6 +23,7 @@ import { Route as DashboardAuthedIndexRouteImport } from './routes/dashboard/_au
 import { Route as DashboardAuthedTimelineRouteImport } from './routes/dashboard/_authed/timeline'
 import { Route as DashboardAuthedTeamRouteImport } from './routes/dashboard/_authed/team'
 import { Route as DashboardAuthedStatsRouteImport } from './routes/dashboard/_authed/stats'
+import { Route as DashboardAuthedShortlinksRouteImport } from './routes/dashboard/_authed/shortlinks'
 import { Route as DashboardAuthedSettingsRouteImport } from './routes/dashboard/_authed/settings'
 import { Route as DashboardAuthedGalleryRouteImport } from './routes/dashboard/_authed/gallery'
 import { Route as DashboardAuthedPostsIndexRouteImport } from './routes/dashboard/_authed/posts.index'
@@ -40,6 +42,11 @@ const ContactRoute = ContactRouteImport.update({
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CodeRoute = CodeRouteImport.update({
+  id: '/$code',
+  path: '/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRouteRoute = DashboardRouteRouteImport.update({
@@ -91,6 +98,12 @@ const DashboardAuthedStatsRoute = DashboardAuthedStatsRouteImport.update({
   path: '/stats',
   getParentRoute: () => DashboardAuthedRoute,
 } as any)
+const DashboardAuthedShortlinksRoute =
+  DashboardAuthedShortlinksRouteImport.update({
+    id: '/shortlinks',
+    path: '/shortlinks',
+    getParentRoute: () => DashboardAuthedRoute,
+  } as any)
 const DashboardAuthedSettingsRoute = DashboardAuthedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -116,6 +129,7 @@ const DashboardAuthedPostsIdRoute = DashboardAuthedPostsIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteRouteWithChildren
+  '/$code': typeof CodeRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/gallery': typeof GalleryRoute
@@ -124,6 +138,7 @@ export interface FileRoutesByFullPath {
   '/blog/': typeof BlogIndexRoute
   '/dashboard/gallery': typeof DashboardAuthedGalleryRoute
   '/dashboard/settings': typeof DashboardAuthedSettingsRoute
+  '/dashboard/shortlinks': typeof DashboardAuthedShortlinksRoute
   '/dashboard/stats': typeof DashboardAuthedStatsRoute
   '/dashboard/team': typeof DashboardAuthedTeamRoute
   '/dashboard/timeline': typeof DashboardAuthedTimelineRoute
@@ -134,6 +149,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardAuthedIndexRoute
+  '/$code': typeof CodeRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/gallery': typeof GalleryRoute
@@ -142,6 +158,7 @@ export interface FileRoutesByTo {
   '/blog': typeof BlogIndexRoute
   '/dashboard/gallery': typeof DashboardAuthedGalleryRoute
   '/dashboard/settings': typeof DashboardAuthedSettingsRoute
+  '/dashboard/shortlinks': typeof DashboardAuthedShortlinksRoute
   '/dashboard/stats': typeof DashboardAuthedStatsRoute
   '/dashboard/team': typeof DashboardAuthedTeamRoute
   '/dashboard/timeline': typeof DashboardAuthedTimelineRoute
@@ -152,6 +169,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteRouteWithChildren
+  '/$code': typeof CodeRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/gallery': typeof GalleryRoute
@@ -161,6 +179,7 @@ export interface FileRoutesById {
   '/blog/': typeof BlogIndexRoute
   '/dashboard/_authed/gallery': typeof DashboardAuthedGalleryRoute
   '/dashboard/_authed/settings': typeof DashboardAuthedSettingsRoute
+  '/dashboard/_authed/shortlinks': typeof DashboardAuthedShortlinksRoute
   '/dashboard/_authed/stats': typeof DashboardAuthedStatsRoute
   '/dashboard/_authed/team': typeof DashboardAuthedTeamRoute
   '/dashboard/_authed/timeline': typeof DashboardAuthedTimelineRoute
@@ -173,6 +192,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/dashboard'
+    | '/$code'
     | '/about'
     | '/contact'
     | '/gallery'
@@ -181,6 +201,7 @@ export interface FileRouteTypes {
     | '/blog/'
     | '/dashboard/gallery'
     | '/dashboard/settings'
+    | '/dashboard/shortlinks'
     | '/dashboard/stats'
     | '/dashboard/team'
     | '/dashboard/timeline'
@@ -191,6 +212,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/dashboard'
+    | '/$code'
     | '/about'
     | '/contact'
     | '/gallery'
@@ -199,6 +221,7 @@ export interface FileRouteTypes {
     | '/blog'
     | '/dashboard/gallery'
     | '/dashboard/settings'
+    | '/dashboard/shortlinks'
     | '/dashboard/stats'
     | '/dashboard/team'
     | '/dashboard/timeline'
@@ -208,6 +231,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/dashboard'
+    | '/$code'
     | '/about'
     | '/contact'
     | '/gallery'
@@ -217,6 +241,7 @@ export interface FileRouteTypes {
     | '/blog/'
     | '/dashboard/_authed/gallery'
     | '/dashboard/_authed/settings'
+    | '/dashboard/_authed/shortlinks'
     | '/dashboard/_authed/stats'
     | '/dashboard/_authed/team'
     | '/dashboard/_authed/timeline'
@@ -228,6 +253,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
+  CodeRoute: typeof CodeRoute
   AboutRoute: typeof AboutRoute
   ContactRoute: typeof ContactRoute
   GalleryRoute: typeof GalleryRoute
@@ -256,6 +282,13 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$code': {
+      id: '/$code'
+      path: '/$code'
+      fullPath: '/$code'
+      preLoaderRoute: typeof CodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -328,6 +361,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAuthedStatsRouteImport
       parentRoute: typeof DashboardAuthedRoute
     }
+    '/dashboard/_authed/shortlinks': {
+      id: '/dashboard/_authed/shortlinks'
+      path: '/shortlinks'
+      fullPath: '/dashboard/shortlinks'
+      preLoaderRoute: typeof DashboardAuthedShortlinksRouteImport
+      parentRoute: typeof DashboardAuthedRoute
+    }
     '/dashboard/_authed/settings': {
       id: '/dashboard/_authed/settings'
       path: '/settings'
@@ -362,6 +402,7 @@ declare module '@tanstack/react-router' {
 interface DashboardAuthedRouteChildren {
   DashboardAuthedGalleryRoute: typeof DashboardAuthedGalleryRoute
   DashboardAuthedSettingsRoute: typeof DashboardAuthedSettingsRoute
+  DashboardAuthedShortlinksRoute: typeof DashboardAuthedShortlinksRoute
   DashboardAuthedStatsRoute: typeof DashboardAuthedStatsRoute
   DashboardAuthedTeamRoute: typeof DashboardAuthedTeamRoute
   DashboardAuthedTimelineRoute: typeof DashboardAuthedTimelineRoute
@@ -373,6 +414,7 @@ interface DashboardAuthedRouteChildren {
 const DashboardAuthedRouteChildren: DashboardAuthedRouteChildren = {
   DashboardAuthedGalleryRoute: DashboardAuthedGalleryRoute,
   DashboardAuthedSettingsRoute: DashboardAuthedSettingsRoute,
+  DashboardAuthedShortlinksRoute: DashboardAuthedShortlinksRoute,
   DashboardAuthedStatsRoute: DashboardAuthedStatsRoute,
   DashboardAuthedTeamRoute: DashboardAuthedTeamRoute,
   DashboardAuthedTimelineRoute: DashboardAuthedTimelineRoute,
@@ -402,6 +444,7 @@ const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
+  CodeRoute: CodeRoute,
   AboutRoute: AboutRoute,
   ContactRoute: ContactRoute,
   GalleryRoute: GalleryRoute,
