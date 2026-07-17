@@ -65,14 +65,14 @@ pnpm db:migrate && pnpm db:seed && pnpm dev
 
 ## Content model
 
-| Section        | Managed at                | Table               |
-| -------------- | ------------------------- | ------------------- |
-| Blog posts     | `/dashboard/posts`        | `posts`             |
-| Gallery        | `/dashboard/gallery`      | `gallery_items`     |
-| Team           | `/dashboard/team`         | `team_members`      |
-| Timeline       | `/dashboard/timeline`     | `timeline_entries`  |
-| Stats          | `/dashboard/stats`        | `stats`             |
-| Links / email  | `/dashboard/settings`     | `site_settings`     |
+| Section       | Managed at            | Table              |
+| ------------- | --------------------- | ------------------ |
+| Blog posts    | `/dashboard/posts`    | `posts`            |
+| Gallery       | `/dashboard/gallery`  | `gallery_items`    |
+| Team          | `/dashboard/team`     | `team_members`     |
+| Timeline      | `/dashboard/timeline` | `timeline_entries` |
+| Stats         | `/dashboard/stats`    | `stats`            |
+| Links / email | `/dashboard/settings` | `site_settings`    |
 
 Blog posts are written in **markdown**. Code fences are highlighted with Shiki. The dashboard editor shows a live preview using the same render pipeline the public page uses ([`src/lib/markdown.ts`](src/lib/markdown.ts)).
 
