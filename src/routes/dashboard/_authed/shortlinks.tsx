@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
 import { CopyIcon, ExternalLinkIcon, LinkIcon, PencilIcon, PlusIcon, QrCodeIcon, Trash2Icon } from 'lucide-react'
 import { z } from 'zod'
@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import { PageHeader } from '#/components/dashboard/page-header.tsx'
 import { ConfirmDelete } from '#/components/dashboard/confirm-delete.tsx'
 import { FormField, fieldErrors } from '#/components/dashboard/form-field.tsx'
+import { Pagination } from '#/components/pagination.tsx'
 import { Button } from '#/components/ui/button.tsx'
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
@@ -17,6 +18,8 @@ import type { Shortlink } from '#/db/schema.ts'
 import { deleteShortlink, listShortlinks, saveShortlink } from '#/server/admin.ts'
 import { SkeletonTable } from '#/components/dashboard/skeletons.tsx'
 import { QrCodeCard } from '#/components/dashboard/qr-code.tsx'
+
+const shortlinksSearch = z.object({ page: z.number().int().min(1).catch(1).default(1) })
 
 const shortlinkInput = z.object({
   id: z.number().int().optional(),
@@ -28,7 +31,9 @@ export const Route = createFileRoute('/dashboard/_authed/shortlinks')({
   component: ShortlinksAdmin,
   pendingMs: 200,
   pendingComponent: () => <SkeletonTable />,
-  loader: () => listShortlinks(),
+  validateSearch: shortlinksSearch,
+  loaderDeps: ({ search }) => ({ page: search.page }),
+  loader: ({ deps }) => listShortlinks({ data: deps }),
 })
 
 function ShortlinkForm({ item, onDone }: { item?: Shortlink; onDone: () => void }) {
@@ -84,7 +89,8 @@ function ShortlinkForm({ item, onDone }: { item?: Shortlink; onDone: () => void 
 }
 
 export default function ShortlinksAdmin() {
-  const rows = Route.useLoaderData()
+  const { rows, total, page, pageSize } = Route.useLoaderData()
+  const navigate = useNavigate({ from: Route.fullPath })
   const router = useRouter()
   const [open, setOpen] = React.useState(false)
   const [editing, setEditing] = React.useState<Shortlink | undefined>()
@@ -147,6 +153,14 @@ export default function ShortlinksAdmin() {
           </table>
         </div>
       )}
+
+      <Pagination
+        page={page}
+        pageSize={pageSize}
+        total={total}
+        onPageChange={(p) => navigate({ search: (prev) => ({ ...prev, page: p }) })}
+      />
+
       <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setEditing(undefined) }}>
         <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>{editing ? 'Edit shortlink' : 'Shortlink baru'}</DialogTitle></DialogHeader>

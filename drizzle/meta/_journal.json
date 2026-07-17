@@ -15,6 +15,13 @@
       "when": 1784281731946,
       "tag": "0001_sweet_morph",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784298791248,
+      "tag": "0002_pale_iron_man",
+      "breakpoints": true
     }
   ]
 }

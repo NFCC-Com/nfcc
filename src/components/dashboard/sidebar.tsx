@@ -66,7 +66,7 @@ export function AppSidebar({ email }: { email: string }) {
         <Link
           to="/dashboard"
           onClick={closeMobile}
-          className="flex items-center gap-2 px-2 pt-3 pb-2 font-display text-base font-semibold group-data-[collapsible=icon]:hidden"
+          className="flex items-center gap-2 px-2 pt-3 pb-2 font-display text-base font-semibold"
         >
           <img src="/logo.png" alt="NFCC" className="size-7 shrink-0 rounded-md" />
           NFCC Admin
@@ -74,7 +74,7 @@ export function AppSidebar({ email }: { email: string }) {
         <Link
           to="/dashboard"
           onClick={closeMobile}
-          className="hidden items-center justify-center py-2 group-data-[collapsible=icon]:flex"
+          className="hidden items-center justify-center py-2"
         >
           <img src="/logo.png" alt="NFCC" className="size-7 rounded-md" />
         </Link>

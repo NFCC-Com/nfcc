@@ -1,9 +1,11 @@
-import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate, useRouter } from '@tanstack/react-router'
 import { PlusIcon, PencilIcon, Trash2Icon } from 'lucide-react'
+import { z } from 'zod'
 import { toast } from 'sonner'
 
 import { PageHeader } from '#/components/dashboard/page-header.tsx'
 import { ConfirmDelete } from '#/components/dashboard/confirm-delete.tsx'
+import { Pagination } from '#/components/pagination.tsx'
 import { Badge } from '#/components/ui/badge.tsx'
 import { Button } from '#/components/ui/button.tsx'
 import {
@@ -17,15 +19,20 @@ import {
 import { deletePost, listAllPosts } from '#/server/admin.ts'
 import { SkeletonTable } from '#/components/dashboard/skeletons.tsx'
 
+const postsSearch = z.object({ page: z.number().int().min(1).catch(1).default(1) })
+
 export const Route = createFileRoute('/dashboard/_authed/posts/')({
   component: PostsList,
   pendingMs: 200,
   pendingComponent: () => <SkeletonTable />,
-  loader: () => listAllPosts(),
+  validateSearch: postsSearch,
+  loaderDeps: ({ search }) => ({ page: search.page }),
+  loader: ({ deps }) => listAllPosts({ data: deps }),
 })
 
 function PostsList() {
-  const posts = Route.useLoaderData()
+  const { rows: posts, total, page, pageSize } = Route.useLoaderData()
+  const navigate = useNavigate({ from: Route.fullPath })
   const router = useRouter()
 
   async function handleDelete(id: number) {
@@ -109,6 +116,13 @@ function PostsList() {
           </Table>
         </div>
       )}
+
+      <Pagination
+        page={page}
+        pageSize={pageSize}
+        total={total}
+        onPageChange={(p) => navigate({ search: (prev) => ({ ...prev, page: p }) })}
+      />
     </div>
   )
 }

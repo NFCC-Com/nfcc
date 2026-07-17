@@ -2,13 +2,17 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import { TimelineItem } from '#/components/timeline-item.tsx'
 import { TeamCard } from '#/components/team-card.tsx'
-import { getTeam, getTimeline } from '#/server/content.ts'
+import { getSettings, getTeam, getTimeline } from '#/server/content.ts'
 
 export const Route = createFileRoute('/about')({
   component: About,
   loader: async () => {
-    const [team, timeline] = await Promise.all([getTeam(), getTimeline()])
-    return { team, timeline }
+    const [team, timeline, settings] = await Promise.all([
+      getTeam(),
+      getTimeline(),
+      getSettings(),
+    ])
+    return { team, timeline, settings }
   },
   head: () => ({
     meta: [
@@ -23,9 +27,11 @@ export const Route = createFileRoute('/about')({
 })
 
 function About() {
-  const { team, timeline } = Route.useLoaderData()
-  // Distinct divisions in the order they first appear in the roster.
-  const divisions = [...new Set(team.map((member) => member.division))]
+  const { team, timeline, settings } = Route.useLoaderData()
+  // Distinct periode (blank -> "Umum" bucket) in first-appearance order, each holding
+  // its own distinct-division breakdown.
+  const periodeKey = (p: string) => p || 'Umum'
+  const periodes = [...new Set(team.map((member) => periodeKey(member.periode)))]
 
   return (
     <>
@@ -72,6 +78,18 @@ function About() {
         </div>
       </section>
 
+      {settings.logoPhilosophy && (
+        <section className="page-wrap py-20">
+          <div className="eyebrow">Filosofi Logo</div>
+          <h2 className="display-title mt-2 max-w-2xl text-2xl font-semibold">
+            Kenapa logonya begitu
+          </h2>
+          <p className="mt-3 max-w-2xl whitespace-pre-line text-muted-foreground">
+            {settings.logoPhilosophy}
+          </p>
+        </section>
+      )}
+
       {timeline.length > 0 && (
         <section className="page-wrap py-20">
           <div className="eyebrow">Tonggak sejarah</div>
@@ -96,23 +114,40 @@ function About() {
           <h2 className="display-title mt-2 text-3xl font-semibold sm:text-4xl">
             Yang ngurus ini semua
           </h2>
-          <div className="mt-12 flex flex-col gap-12">
-            {divisions.map((division) => {
-              const members = team.filter(
-                (member) => member.division === division,
+          <div className="mt-12 flex flex-col gap-16">
+            {periodes.map((periode) => {
+              const periodeMembers = team.filter(
+                (member) => periodeKey(member.periode) === periode,
               )
+              const divisions = [
+                ...new Set(periodeMembers.map((member) => member.division)),
+              ]
               return (
-                <div key={division}>
-                  <div className="flex items-center gap-4">
-                    <h3 className="shrink-0 font-mono text-xs tracking-wide text-muted-foreground uppercase">
-                      {division}
-                    </h3>
-                    <div className="h-px flex-1 bg-border" />
-                  </div>
-                  <div className="mt-7 grid grid-cols-2 gap-x-4 gap-y-9 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                    {members.map((member) => (
-                      <TeamCard key={member.id} member={member} />
-                    ))}
+                <div key={periode}>
+                  <h3 className="font-mono text-sm tracking-wide text-brand-orange uppercase">
+                    Periode {periode}
+                  </h3>
+                  <div className="mt-8 flex flex-col gap-12">
+                    {divisions.map((division) => {
+                      const members = periodeMembers.filter(
+                        (member) => member.division === division,
+                      )
+                      return (
+                        <div key={division}>
+                          <div className="flex items-center gap-4">
+                            <h4 className="shrink-0 font-mono text-xs tracking-wide text-muted-foreground uppercase">
+                              {division}
+                            </h4>
+                            <div className="h-px flex-1 bg-border" />
+                          </div>
+                          <div className="mt-7 grid grid-cols-2 gap-x-4 gap-y-9 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                            {members.map((member) => (
+                              <TeamCard key={member.id} member={member} />
+                            ))}
+                          </div>
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
               )

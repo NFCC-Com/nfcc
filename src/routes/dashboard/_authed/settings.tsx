@@ -7,6 +7,7 @@ import { PageHeader } from '#/components/dashboard/page-header.tsx'
 import { FormField, fieldErrors } from '#/components/dashboard/form-field.tsx'
 import { Button } from '#/components/ui/button.tsx'
 import { Input } from '#/components/ui/input.tsx'
+import { Textarea } from '#/components/ui/textarea.tsx'
 import { saveSettings } from '#/server/admin.ts'
 import { getSettings } from '#/server/content.ts'
 import { SkeletonForm } from '#/components/dashboard/skeletons.tsx'
@@ -16,6 +17,7 @@ const settingsInput = z.object({
   website: z.string().min(1, 'Wajib diisi'),
   ctfUrl: z.string().min(1, 'Wajib diisi'),
   contactEmail: z.string().min(1, 'Wajib diisi'),
+  logoPhilosophy: z.string(),
 })
 
 export const Route = createFileRoute('/dashboard/_authed/settings')({
@@ -35,6 +37,7 @@ export default function SettingsAdmin() {
       website: settings.website,
       ctfUrl: settings.ctfUrl,
       contactEmail: settings.contactEmail,
+      logoPhilosophy: settings.logoPhilosophy,
     } satisfies z.input<typeof settingsInput>,
     validators: { onChange: settingsInput },
     onSubmit: async ({ value }) => {
@@ -59,6 +62,9 @@ export default function SettingsAdmin() {
         </form.Field>
         <form.Field name="contactEmail" validators={{ onChange: z.string().min(1, 'Wajib diisi') }}>
           {(f) => <FormField label="Email kontak" errors={fieldErrors(f)}><Input type="email" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} onBlur={f.handleBlur} /></FormField>}
+        </form.Field>
+        <form.Field name="logoPhilosophy">
+          {(f) => <FormField label="Filosofi logo"><Textarea rows={5} value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} onBlur={f.handleBlur} /></FormField>}
         </form.Field>
         <Button type="submit" disabled={form.state.isSubmitting} className="self-start">
           {form.state.isSubmitting ? 'Menyimpan\u2026' : 'Simpan pengaturan'}

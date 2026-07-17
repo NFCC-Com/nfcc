@@ -12,41 +12,13 @@ import {
 import { PageHeader } from '#/components/dashboard/page-header.tsx'
 import { SkeletonCardGrid } from '#/components/dashboard/skeletons.tsx'
 import { SlidingNumber } from '#/components/animate-ui/primitives/texts/sliding-number.tsx'
-import {
-  listAllPosts,
-  listGallery,
-  listTeam,
-  listTimeline,
-  listStats,
-  listShortlinks,
-} from '#/server/admin.ts'
+import { getDashboardCounts } from '#/server/admin.ts'
 
 export const Route = createFileRoute('/dashboard/_authed/')({
   component: Overview,
   pendingMs: 200,
   pendingComponent: () => <SkeletonCardGrid />,
-  loader: async () => {
-    const [posts, gallery, team, timeline, stats, shortlinks] =
-      await Promise.all([
-        listAllPosts(),
-        listGallery(),
-        listTeam(),
-        listTimeline(),
-        listStats(),
-        listShortlinks(),
-      ])
-    return {
-      counts: {
-        posts: posts.length,
-        published: posts.filter((p) => p.published).length,
-        gallery: gallery.length,
-        team: team.length,
-        timeline: timeline.length,
-        stats: stats.length,
-        shortlinks: shortlinks.length,
-      },
-    }
-  },
+  loader: async () => ({ counts: await getDashboardCounts() }),
 })
 
 function Overview() {

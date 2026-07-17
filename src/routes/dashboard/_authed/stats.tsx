@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
 import { PlusIcon, PencilIcon, Trash2Icon } from 'lucide-react'
 import { z } from 'zod'
@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import { PageHeader } from '#/components/dashboard/page-header.tsx'
 import { ConfirmDelete } from '#/components/dashboard/confirm-delete.tsx'
 import { FormField, fieldErrors } from '#/components/dashboard/form-field.tsx'
+import { Pagination } from '#/components/pagination.tsx'
 import { Button } from '#/components/ui/button.tsx'
 import {
   Dialog,
@@ -21,6 +22,8 @@ import type { Stat } from '#/db/schema.ts'
 import { deleteStat, listStats, saveStat } from '#/server/admin.ts'
 import { SkeletonCardGrid } from '#/components/dashboard/skeletons.tsx'
 
+const statsSearch = z.object({ page: z.number().int().min(1).catch(1).default(1) })
+
 const statInput = z.object({
   id: z.number().int().optional(),
   label: z.string().min(1, 'Label wajib diisi'),
@@ -32,7 +35,9 @@ export const Route = createFileRoute('/dashboard/_authed/stats')({
   component: StatsAdmin,
   pendingMs: 200,
   pendingComponent: () => <SkeletonCardGrid cards={4} />,
-  loader: () => listStats(),
+  validateSearch: statsSearch,
+  loaderDeps: ({ search }) => ({ page: search.page }),
+  loader: ({ deps }) => listStats({ data: deps }),
 })
 
 function StatForm({ item, onDone }: { item?: Stat; onDone: () => void }) {
@@ -86,7 +91,8 @@ function StatForm({ item, onDone }: { item?: Stat; onDone: () => void }) {
 }
 
 export default function StatsAdmin() {
-  const rows = Route.useLoaderData()
+  const { rows, total, page, pageSize } = Route.useLoaderData()
+  const navigate = useNavigate({ from: Route.fullPath })
   const router = useRouter()
   const [open, setOpen] = React.useState(false)
   const [editing, setEditing] = React.useState<Stat | undefined>()
@@ -116,6 +122,14 @@ export default function StatsAdmin() {
           ))}
         </div>
       )}
+
+      <Pagination
+        page={page}
+        pageSize={pageSize}
+        total={total}
+        onPageChange={(p) => navigate({ search: (prev) => ({ ...prev, page: p }) })}
+      />
+
       <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setEditing(undefined) }}>
         <DialogContent>
           <DialogHeader><DialogTitle>{editing ? 'Edit stat' : 'Tambah stat'}</DialogTitle></DialogHeader>

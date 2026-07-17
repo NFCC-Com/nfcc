@@ -1,11 +1,17 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { z } from 'zod'
 
 import { PostCard } from '#/components/post-card.tsx'
+import { Pagination } from '#/components/pagination.tsx'
 import { getPublishedPosts } from '#/server/content.ts'
+
+const blogSearch = z.object({ page: z.number().int().min(1).catch(1).default(1) })
 
 export const Route = createFileRoute('/blog/')({
   component: BlogIndex,
-  loader: () => getPublishedPosts(),
+  validateSearch: blogSearch,
+  loaderDeps: ({ search }) => ({ page: search.page }),
+  loader: ({ deps }) => getPublishedPosts({ data: deps }),
   head: () => ({
     meta: [
       { title: 'Blog — NFCC' },
@@ -18,7 +24,8 @@ export const Route = createFileRoute('/blog/')({
 })
 
 function BlogIndex() {
-  const posts = Route.useLoaderData()
+  const { rows: posts, total, page, pageSize } = Route.useLoaderData()
+  const navigate = useNavigate({ from: Route.fullPath })
 
   return (
     <section className="page-wrap py-20">
@@ -41,6 +48,13 @@ function BlogIndex() {
           ))}
         </div>
       )}
+
+      <Pagination
+        page={page}
+        pageSize={pageSize}
+        total={total}
+        onPageChange={(p) => navigate({ search: (prev) => ({ ...prev, page: p }) })}
+      />
     </section>
   )
 }

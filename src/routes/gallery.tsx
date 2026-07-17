@@ -1,11 +1,17 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { z } from 'zod'
 
 import { GalleryGrid } from '#/components/gallery-grid.tsx'
+import { Pagination } from '#/components/pagination.tsx'
 import { getGallery } from '#/server/content.ts'
+
+const gallerySearch = z.object({ page: z.number().int().min(1).catch(1).default(1) })
 
 export const Route = createFileRoute('/gallery')({
   component: Gallery,
-  loader: () => getGallery(),
+  validateSearch: gallerySearch,
+  loaderDeps: ({ search }) => ({ page: search.page }),
+  loader: ({ deps }) => getGallery({ data: deps }),
   head: () => ({
     meta: [
       { title: 'Galeri — NFCC' },
@@ -18,7 +24,8 @@ export const Route = createFileRoute('/gallery')({
 })
 
 function Gallery() {
-  const entries = Route.useLoaderData()
+  const { rows: entries, total, page, pageSize } = Route.useLoaderData()
+  const navigate = useNavigate({ from: Route.fullPath })
 
   return (
     <>
@@ -52,6 +59,13 @@ function Gallery() {
         ) : (
           <GalleryGrid entries={entries} />
         )}
+
+        <Pagination
+          page={page}
+          pageSize={pageSize}
+          total={total}
+          onPageChange={(p) => navigate({ search: (prev) => ({ ...prev, page: p }) })}
+        />
       </section>
     </>
   )

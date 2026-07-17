@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
 import { PlusIcon, PencilIcon, Trash2Icon } from 'lucide-react'
 import { z } from 'zod'
@@ -9,6 +9,7 @@ import { PageHeader } from '#/components/dashboard/page-header.tsx'
 import { ConfirmDelete } from '#/components/dashboard/confirm-delete.tsx'
 import { ImageUpload } from '#/components/dashboard/image-upload.tsx'
 import { FormField, fieldErrors } from '#/components/dashboard/form-field.tsx'
+import { Pagination } from '#/components/pagination.tsx'
 import { Button } from '#/components/ui/button.tsx'
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
@@ -17,6 +18,8 @@ import { Input } from '#/components/ui/input.tsx'
 import type { GalleryItem } from '#/db/schema.ts'
 import { deleteGalleryItem, listGallery, saveGalleryItem } from '#/server/admin.ts'
 import { SkeletonCardGrid } from '#/components/dashboard/skeletons.tsx'
+
+const gallerySearch = z.object({ page: z.number().int().min(1).catch(1).default(1) })
 
 const galleryInput = z.object({
   id: z.number().int().optional(),
@@ -31,7 +34,9 @@ export const Route = createFileRoute('/dashboard/_authed/gallery')({
   component: GalleryAdmin,
   pendingMs: 200,
   pendingComponent: () => <SkeletonCardGrid />,
-  loader: () => listGallery(),
+  validateSearch: gallerySearch,
+  loaderDeps: ({ search }) => ({ page: search.page }),
+  loader: ({ deps }) => listGallery({ data: deps }),
 })
 
 function GalleryForm({ item, onDone }: { item?: GalleryItem; onDone: () => void }) {
@@ -80,7 +85,8 @@ function GalleryForm({ item, onDone }: { item?: GalleryItem; onDone: () => void 
 }
 
 export default function GalleryAdmin() {
-  const items = Route.useLoaderData()
+  const { rows: items, total, page, pageSize } = Route.useLoaderData()
+  const navigate = useNavigate({ from: Route.fullPath })
   const router = useRouter()
   const [open, setOpen] = React.useState(false)
   const [editing, setEditing] = React.useState<GalleryItem | undefined>()
@@ -113,6 +119,14 @@ export default function GalleryAdmin() {
           ))}
         </div>
       )}
+
+      <Pagination
+        page={page}
+        pageSize={pageSize}
+        total={total}
+        onPageChange={(p) => navigate({ search: (prev) => ({ ...prev, page: p }) })}
+      />
+
       <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setEditing(undefined) }}>
         <DialogContent>
           <DialogHeader><DialogTitle>{editing ? 'Edit foto' : 'Tambah foto'}</DialogTitle></DialogHeader>

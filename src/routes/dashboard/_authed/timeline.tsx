@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
 import { PlusIcon, PencilIcon, Trash2Icon } from 'lucide-react'
 import { z } from 'zod'
@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import { PageHeader } from '#/components/dashboard/page-header.tsx'
 import { ConfirmDelete } from '#/components/dashboard/confirm-delete.tsx'
 import { FormField, fieldErrors } from '#/components/dashboard/form-field.tsx'
+import { Pagination } from '#/components/pagination.tsx'
 import { Button } from '#/components/ui/button.tsx'
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
@@ -17,6 +18,8 @@ import { Textarea } from '#/components/ui/textarea.tsx'
 import type { TimelineEntry } from '#/db/schema.ts'
 import { deleteTimelineEntry, listTimeline, saveTimelineEntry } from '#/server/admin.ts'
 import { SkeletonList } from '#/components/dashboard/skeletons.tsx'
+
+const timelineSearch = z.object({ page: z.number().int().min(1).catch(1).default(1) })
 
 const timelineInput = z.object({
   id: z.number().int().optional(),
@@ -30,7 +33,9 @@ export const Route = createFileRoute('/dashboard/_authed/timeline')({
   component: TimelineAdmin,
   pendingMs: 200,
   pendingComponent: () => <SkeletonList />,
-  loader: () => listTimeline(),
+  validateSearch: timelineSearch,
+  loaderDeps: ({ search }) => ({ page: search.page }),
+  loader: ({ deps }) => listTimeline({ data: deps }),
 })
 
 function TimelineForm({ entry, onDone }: { entry?: TimelineEntry; onDone: () => void }) {
@@ -75,7 +80,8 @@ function TimelineForm({ entry, onDone }: { entry?: TimelineEntry; onDone: () => 
 }
 
 export default function TimelineAdmin() {
-  const entries = Route.useLoaderData()
+  const { rows: entries, total, page, pageSize } = Route.useLoaderData()
+  const navigate = useNavigate({ from: Route.fullPath })
   const router = useRouter()
   const [open, setOpen] = React.useState(false)
   const [editing, setEditing] = React.useState<TimelineEntry | undefined>()
@@ -108,6 +114,14 @@ export default function TimelineAdmin() {
           ))}
         </div>
       )}
+
+      <Pagination
+        page={page}
+        pageSize={pageSize}
+        total={total}
+        onPageChange={(p) => navigate({ search: (prev) => ({ ...prev, page: p }) })}
+      />
+
       <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setEditing(undefined) }}>
         <DialogContent>
           <DialogHeader><DialogTitle>{editing ? 'Edit milestone' : 'Tambah milestone'}</DialogTitle></DialogHeader>

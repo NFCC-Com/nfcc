@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { asc, desc, eq } from 'drizzle-orm'
+import { and, asc, count, desc, eq } from 'drizzle-orm'
 import { z } from 'zod'
 
 import { db } from '#/db/index.ts'
@@ -54,21 +54,31 @@ export const getSessionUser = createServerFn({ method: 'GET' }).handler(
 
 // ─── Posts ───────────────────────────────────────────────────────────────────
 
-export const listAllPosts = createServerFn({ method: 'GET' }).handler(
-  async () => {
+const POSTS_PAGE_SIZE = 10
+
+const listInput = z.object({ page: z.number().int().min(1).default(1) })
+
+export const listAllPosts = createServerFn({ method: 'GET' })
+  .validator((data: z.input<typeof listInput>) => listInput.parse(data))
+  .handler(async ({ data }) => {
     await requireAdmin()
-    return db
-      .select({
-        id: posts.id,
-        slug: posts.slug,
-        title: posts.title,
-        published: posts.published,
-        updatedAt: posts.updatedAt,
-      })
-      .from(posts)
-      .orderBy(desc(posts.updatedAt))
-  },
-)
+    const [rows, [{ value: total }]] = await Promise.all([
+      db
+        .select({
+          id: posts.id,
+          slug: posts.slug,
+          title: posts.title,
+          published: posts.published,
+          updatedAt: posts.updatedAt,
+        })
+        .from(posts)
+        .orderBy(desc(posts.updatedAt))
+        .limit(POSTS_PAGE_SIZE)
+        .offset((data.page - 1) * POSTS_PAGE_SIZE),
+      db.select({ value: count() }).from(posts),
+    ])
+    return { rows, total, page: data.page, pageSize: POSTS_PAGE_SIZE }
+  })
 
 export const renderPreview = createServerFn({ method: 'POST' })
   .validator((markdown: string) => z.string().parse(markdown))
@@ -175,13 +185,58 @@ export const deleteGalleryItem = createServerFn({ method: 'POST' })
     return { ok: true as const }
   })
 
-export const listGallery = createServerFn({ method: 'GET' }).handler(
+const GALLERY_PAGE_SIZE = 12
+
+export const listGallery = createServerFn({ method: 'GET' })
+  .validator((data: z.input<typeof listInput>) => listInput.parse(data))
+  .handler(async ({ data }) => {
+    await requireAdmin()
+    const [rows, [{ value: total }]] = await Promise.all([
+      db
+        .select()
+        .from(galleryItems)
+        .orderBy(asc(galleryItems.sortOrder), asc(galleryItems.id))
+        .limit(GALLERY_PAGE_SIZE)
+        .offset((data.page - 1) * GALLERY_PAGE_SIZE),
+      db.select({ value: count() }).from(galleryItems),
+    ])
+    return { rows, total, page: data.page, pageSize: GALLERY_PAGE_SIZE }
+  })
+
+// ─── Dashboard overview ──────────────────────────────────────────────────────
+
+export const getDashboardCounts = createServerFn({ method: 'GET' }).handler(
   async () => {
     await requireAdmin()
-    return db
-      .select()
-      .from(galleryItems)
-      .orderBy(asc(galleryItems.sortOrder), asc(galleryItems.id))
+    const [
+      [{ value: postsTotal }],
+      [{ value: publishedTotal }],
+      [{ value: galleryTotal }],
+      [{ value: teamTotal }],
+      [{ value: timelineTotal }],
+      [{ value: statsTotal }],
+      [{ value: shortlinksTotal }],
+    ] = await Promise.all([
+      db.select({ value: count() }).from(posts),
+      db
+        .select({ value: count() })
+        .from(posts)
+        .where(eq(posts.published, true)),
+      db.select({ value: count() }).from(galleryItems),
+      db.select({ value: count() }).from(teamMembers),
+      db.select({ value: count() }).from(timelineEntries),
+      db.select({ value: count() }).from(stats),
+      db.select({ value: count() }).from(shortlinks),
+    ])
+    return {
+      posts: postsTotal,
+      published: publishedTotal,
+      gallery: galleryTotal,
+      team: teamTotal,
+      timeline: timelineTotal,
+      stats: statsTotal,
+      shortlinks: shortlinksTotal,
+    }
   },
 )
 
@@ -192,7 +247,11 @@ const teamInput = z.object({
   name: z.string().min(1),
   role: z.string().default(''),
   division: z.string().default('Tim Inti'),
+  periode: z.string().default(''),
   photo: z.string().default('/placeholders/avatar.svg'),
+  instagram: z.string().default(''),
+  linkedin: z.string().default(''),
+  github: z.string().default(''),
   sortOrder: z.number().int().default(0),
 })
 
@@ -217,13 +276,51 @@ export const deleteTeamMember = createServerFn({ method: 'POST' })
     return { ok: true as const }
   })
 
-export const listTeam = createServerFn({ method: 'GET' }).handler(async () => {
-  await requireAdmin()
-  return db
-    .select()
-    .from(teamMembers)
-    .orderBy(asc(teamMembers.sortOrder), asc(teamMembers.id))
+const TEAM_PAGE_SIZE = 12
+
+const teamListInput = z.object({
+  page: z.number().int().min(1).default(1),
+  periode: z.string().optional(),
+  division: z.string().optional(),
 })
+
+export const listTeam = createServerFn({ method: 'GET' })
+  .validator((data: z.input<typeof teamListInput>) => teamListInput.parse(data))
+  .handler(async ({ data }) => {
+    await requireAdmin()
+    const conditions = [
+      data.periode ? eq(teamMembers.periode, data.periode) : undefined,
+      data.division ? eq(teamMembers.division, data.division) : undefined,
+    ].filter((c) => c !== undefined)
+    const where = conditions.length > 0 ? and(...conditions) : undefined
+
+    const [rows, [{ value: total }], periodeRows, divisionRows] =
+      await Promise.all([
+        db
+          .select()
+          .from(teamMembers)
+          .where(where)
+          .orderBy(asc(teamMembers.sortOrder), asc(teamMembers.id))
+          .limit(TEAM_PAGE_SIZE)
+          .offset((data.page - 1) * TEAM_PAGE_SIZE),
+        db.select({ value: count() }).from(teamMembers).where(where),
+        db.selectDistinct({ periode: teamMembers.periode }).from(teamMembers),
+        db
+          .selectDistinct({ division: teamMembers.division })
+          .from(teamMembers),
+      ])
+
+    return {
+      rows,
+      total,
+      page: data.page,
+      pageSize: TEAM_PAGE_SIZE,
+      periodeOptions: periodeRows
+        .map((r) => r.periode)
+        .filter((p) => p.length > 0),
+      divisionOptions: divisionRows.map((r) => r.division),
+    }
+  })
 
 // ─── Timeline ────────────────────────────────────────────────────────────────
 
@@ -259,15 +356,23 @@ export const deleteTimelineEntry = createServerFn({ method: 'POST' })
     return { ok: true as const }
   })
 
-export const listTimeline = createServerFn({ method: 'GET' }).handler(
-  async () => {
+const TIMELINE_PAGE_SIZE = 10
+
+export const listTimeline = createServerFn({ method: 'GET' })
+  .validator((data: z.input<typeof listInput>) => listInput.parse(data))
+  .handler(async ({ data }) => {
     await requireAdmin()
-    return db
-      .select()
-      .from(timelineEntries)
-      .orderBy(asc(timelineEntries.sortOrder), asc(timelineEntries.id))
-  },
-)
+    const [rows, [{ value: total }]] = await Promise.all([
+      db
+        .select()
+        .from(timelineEntries)
+        .orderBy(asc(timelineEntries.sortOrder), asc(timelineEntries.id))
+        .limit(TIMELINE_PAGE_SIZE)
+        .offset((data.page - 1) * TIMELINE_PAGE_SIZE),
+      db.select({ value: count() }).from(timelineEntries),
+    ])
+    return { rows, total, page: data.page, pageSize: TIMELINE_PAGE_SIZE }
+  })
 
 // ─── Stats ───────────────────────────────────────────────────────────────────
 
@@ -299,10 +404,23 @@ export const deleteStat = createServerFn({ method: 'POST' })
     return { ok: true as const }
   })
 
-export const listStats = createServerFn({ method: 'GET' }).handler(async () => {
-  await requireAdmin()
-  return db.select().from(stats).orderBy(asc(stats.sortOrder), asc(stats.id))
-})
+const STATS_PAGE_SIZE = 8
+
+export const listStats = createServerFn({ method: 'GET' })
+  .validator((data: z.input<typeof listInput>) => listInput.parse(data))
+  .handler(async ({ data }) => {
+    await requireAdmin()
+    const [rows, [{ value: total }]] = await Promise.all([
+      db
+        .select()
+        .from(stats)
+        .orderBy(asc(stats.sortOrder), asc(stats.id))
+        .limit(STATS_PAGE_SIZE)
+        .offset((data.page - 1) * STATS_PAGE_SIZE),
+      db.select({ value: count() }).from(stats),
+    ])
+    return { rows, total, page: data.page, pageSize: STATS_PAGE_SIZE }
+  })
 
 // ─── Site settings ─────────────────────────────────────────────────────────
 
@@ -311,6 +429,7 @@ const settingsInput = z.object({
   website: z.string(),
   ctfUrl: z.string(),
   contactEmail: z.string(),
+  logoPhilosophy: z.string().default(''),
 })
 
 export const saveSettings = createServerFn({ method: 'POST' })
@@ -359,15 +478,23 @@ export const uploadImage = createServerFn({ method: 'POST' })
 
 // ─── Shortlinks ──────────────────────────────────────────────────────────────
 
-export const listShortlinks = createServerFn({ method: 'GET' }).handler(
-  async () => {
+const SHORTLINKS_PAGE_SIZE = 10
+
+export const listShortlinks = createServerFn({ method: 'GET' })
+  .validator((data: z.input<typeof listInput>) => listInput.parse(data))
+  .handler(async ({ data }) => {
     await requireAdmin()
-    return db
-      .select()
-      .from(shortlinks)
-      .orderBy(desc(shortlinks.createdAt))
-  },
-)
+    const [rows, [{ value: total }]] = await Promise.all([
+      db
+        .select()
+        .from(shortlinks)
+        .orderBy(desc(shortlinks.createdAt))
+        .limit(SHORTLINKS_PAGE_SIZE)
+        .offset((data.page - 1) * SHORTLINKS_PAGE_SIZE),
+      db.select({ value: count() }).from(shortlinks),
+    ])
+    return { rows, total, page: data.page, pageSize: SHORTLINKS_PAGE_SIZE }
+  })
 
 const shortlinkInput = z.object({
   id: z.number().int().optional(),

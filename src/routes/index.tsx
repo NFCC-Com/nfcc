@@ -11,8 +11,11 @@ import { getPublishedPosts, getStats } from '#/server/content.ts'
 export const Route = createFileRoute('/')({
   component: Home,
   loader: async () => {
-    const [posts, stats] = await Promise.all([getPublishedPosts(), getStats()])
-    return { posts: posts.slice(0, 3), stats }
+    const [published, stats] = await Promise.all([
+      getPublishedPosts({ data: { page: 1 } }),
+      getStats(),
+    ])
+    return { posts: published.rows.slice(0, 3), stats }
   },
 })
 
