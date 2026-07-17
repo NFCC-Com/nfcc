@@ -1,11 +1,12 @@
 import { createServerFn } from '@tanstack/react-start'
-import { asc, desc, eq } from 'drizzle-orm'
+import { asc, desc, eq, sql } from 'drizzle-orm'
 import { z } from 'zod'
 
 import { db } from '#/db/index.ts'
 import {
   galleryItems,
   posts,
+  shortlinks,
   siteSettings,
   stats,
   teamMembers,
@@ -107,3 +108,22 @@ export const getSettings = createServerFn({ method: 'GET' }).handler(
     )
   },
 )
+
+export const resolveShortlink = createServerFn({ method: 'GET' })
+  .validator((code: string) => z.string().parse(code))
+  .handler(async ({ data: code }) => {
+    const existing = await db.query.shortlinks.findFirst({
+      where: eq(shortlinks.code, code),
+    })
+    if (!existing) return null
+
+    await db
+      .update(shortlinks)
+      .set({
+        clicks: sql`${shortlinks.clicks} + 1`,
+        lastClickedAt: sql`now()`,
+      })
+      .where(eq(shortlinks.id, existing.id))
+
+    return existing.url
+  })

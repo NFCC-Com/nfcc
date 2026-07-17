@@ -1,80 +1,64 @@
 import { createServerClient } from '@supabase/ssr'
 import type { CookieOptions } from '@supabase/ssr'
+import { createAdminClient } from '@supabase/server/core'
 import { getCookies, setCookie } from '@tanstack/react-start/server'
 
 function requireEnv(name: string): string {
   const value = process.env[name]
   if (!value) {
     throw new Error(
-      `${name} is not set. Copy .env.example to .env and fill in your Supabase keys.`,
+      `${name} is not set. Copy .env.example to .env and fill in your Supabase values.`,
     )
   }
   return value
 }
 
-// New Supabase key names (sb_publishable_… / sb_secret_…) with fallback to the
-// legacy anon / service_role names.
-function requirePublishableKey(): string {
+// New Supabase publishable key (sb_publishable_…), with legacy anon fallback.
+function publishableKey(): string {
   const value =
     process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY
   if (!value) {
     throw new Error(
-      'SUPABASE_PUBLISHABLE_KEY is not set. Copy .env.example to .env and fill in your Supabase keys.',
-    )
-  }
-  return value
-}
-
-function requireSecretKey(): string {
-  const value =
-    process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!value) {
-    throw new Error(
-      'SUPABASE_SECRET_KEY is not set. It is server-only — set it in .env, never expose it to the client.',
+      'SUPABASE_PUBLISHABLE_KEY is not set. Copy .env.example to .env and fill it in.',
     )
   }
   return value
 }
 
 /**
- * Supabase client bound to the current request's cookies (via TanStack Start's
- * request-scoped cookie helpers). Uses the anon key + user session — safe for auth.
- * Only call inside a server function / server route context.
+ * Cookie-bound Supabase client (@supabase/ssr) for the current request. Owns the
+ * session cookie lifecycle — used for password sign-in/out and reading/refreshing
+ * the session. Only call inside a server function / server route context.
  */
-export function getSupabaseServerClient() {
-  return createServerClient(
-    requireEnv('SUPABASE_URL'),
-    requirePublishableKey(),
-    {
-      cookies: {
-        getAll() {
-          return Object.entries(getCookies()).map(([name, value]) => ({
-            name,
-            value,
-          }))
-        },
-        setAll(
-          cookies: Array<{
-            name: string
-            value: string
-            options?: CookieOptions
-          }>,
-        ) {
-          for (const { name, value, options } of cookies) {
-            setCookie(name, value, options)
-          }
-        },
+export function getSsrClient() {
+  return createServerClient(requireEnv('SUPABASE_URL'), publishableKey(), {
+    cookies: {
+      getAll() {
+        return Object.entries(getCookies()).map(([name, value]) => ({
+          name,
+          value,
+        }))
+      },
+      setAll(
+        cookies: Array<{
+          name: string
+          value: string
+          options?: CookieOptions
+        }>,
+      ) {
+        for (const { name, value, options } of cookies) {
+          setCookie(name, value, options)
+        }
       },
     },
-  )
+  })
 }
 
 /**
- * Privileged admin client using the service-role key. SERVER-ONLY — bypasses RLS and
- * must never be imported into client code. Used for Storage uploads / privileged writes.
+ * Privileged service-role client (@supabase/server), reads SUPABASE_SECRET_KEY.
+ * SERVER-ONLY — bypasses RLS and must never be imported into client code. Used for
+ * Storage uploads / privileged writes in src/server/admin.ts.
  */
 export function getSupabaseAdminClient() {
-  return createServerClient(requireEnv('SUPABASE_URL'), requireSecretKey(), {
-    cookies: { getAll: () => [], setAll: () => {} },
-  })
+  return createAdminClient()
 }

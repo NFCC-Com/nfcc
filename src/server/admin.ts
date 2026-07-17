@@ -6,17 +6,16 @@ import { db } from '#/db/index.ts'
 import {
   galleryItems,
   posts,
+  shortlinks,
   siteSettings,
   stats,
   teamMembers,
   timelineEntries,
 } from '#/db/schema.ts'
-import { requireAdmin } from '#/lib/auth.ts'
+import { getCurrentUser, requireAdmin } from '#/lib/auth.ts'
 import { renderMarkdown } from '#/lib/markdown.ts'
-import {
-  getSupabaseAdminClient,
-  getSupabaseServerClient,
-} from '#/lib/supabase/server.ts'
+import { generateCode, isSafeTargetUrl, isValidCode } from '#/lib/shortlink.ts'
+import { getSsrClient, getSupabaseAdminClient } from '#/lib/supabase/server.ts'
 
 function slugify(input: string): string {
   return input
@@ -37,26 +36,20 @@ export const signIn = createServerFn({ method: 'POST' })
       .parse(data),
   )
   .handler(async ({ data }) => {
-    const supabase = getSupabaseServerClient()
+    const supabase = getSsrClient()
     const { error } = await supabase.auth.signInWithPassword(data)
     if (error) return { ok: false as const, error: error.message }
     return { ok: true as const }
   })
 
 export const signOut = createServerFn({ method: 'POST' }).handler(async () => {
-  const supabase = getSupabaseServerClient()
+  const supabase = getSsrClient()
   await supabase.auth.signOut()
   return { ok: true as const }
 })
 
 export const getSessionUser = createServerFn({ method: 'GET' }).handler(
-  async () => {
-    const supabase = getSupabaseServerClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-    return user ? { id: user.id, email: user.email ?? '' } : null
-  },
+  async () => getCurrentUser(),
 )
 
 // ─── Posts ───────────────────────────────────────────────────────────────────
@@ -99,7 +92,7 @@ const postInput = z.object({
   body: z.string().default(''),
   cover: z.string().nullable().default(null),
   tags: z.array(z.string()).default([]),
-  author: z.string().default('NFCC Team'),
+  author: z.string().default('Tim NFCC'),
   published: z.boolean().default(false),
 })
 
@@ -156,7 +149,7 @@ const galleryInput = z.object({
   id: z.number().int().optional(),
   image: z.string().min(1),
   caption: z.string().default(''),
-  tag: z.string().default('General'),
+  tag: z.string().default('Umum'),
   date: z.string().default(''),
   sortOrder: z.number().int().default(0),
 })
@@ -198,7 +191,7 @@ const teamInput = z.object({
   id: z.number().int().optional(),
   name: z.string().min(1),
   role: z.string().default(''),
-  division: z.string().default('Core Team'),
+  division: z.string().default('Tim Inti'),
   photo: z.string().default('/placeholders/avatar.svg'),
   sortOrder: z.number().int().default(0),
 })
@@ -362,4 +355,97 @@ export const uploadImage = createServerFn({ method: 'POST' })
       data: { publicUrl },
     } = supabase.storage.from(bucket).getPublicUrl(path)
     return { ok: true as const, url: publicUrl }
+  })
+
+// ─── Shortlinks ──────────────────────────────────────────────────────────────
+
+export const listShortlinks = createServerFn({ method: 'GET' }).handler(
+  async () => {
+    await requireAdmin()
+    return db
+      .select()
+      .from(shortlinks)
+      .orderBy(desc(shortlinks.createdAt))
+  },
+)
+
+const shortlinkInput = z.object({
+  id: z.number().int().optional(),
+  url: z.string().min(1),
+  code: z.string().optional(),
+})
+
+export const saveShortlink = createServerFn({ method: 'POST' })
+  .validator((data: z.input<typeof shortlinkInput>) =>
+    shortlinkInput.parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin()
+
+    const url = data.url.trim()
+
+    if (!isSafeTargetUrl(url)) {
+      throw new Error('URL tujuan harus diawali http:// atau https://')
+    }
+
+    let code = (data.code ?? '').trim()
+
+    if (data.id) {
+      const existing = await db.query.shortlinks.findFirst({
+        where: eq(shortlinks.id, data.id),
+      })
+      if (!existing) throw new Error('Shortlink tidak ditemukan')
+
+      const finalCode = code || existing.code
+
+      if (!isValidCode(finalCode)) {
+        throw new Error(
+          'Kode tidak valid. Gunakan huruf, angka, strip, underscore (1-64 karakter). Kata yang di-reserve tidak diizinkan.',
+        )
+      }
+
+      const [row] = await db
+        .update(shortlinks)
+        .set({ url, code: finalCode })
+        .where(eq(shortlinks.id, data.id))
+        .returning({ id: shortlinks.id, code: shortlinks.code })
+      return row
+    }
+
+    if (!code) {
+      for (let attempts = 0; attempts < 5; attempts++) {
+        code = generateCode()
+        const conflict = await db.query.shortlinks.findFirst({
+          where: eq(shortlinks.code, code),
+        })
+        if (!conflict) break
+      }
+    }
+
+    if (!isValidCode(code)) {
+      throw new Error(
+        'Kode tidak valid. Gunakan huruf, angka, strip, underscore (1-64 karakter). Kata yang di-reserve tidak diizinkan.',
+      )
+    }
+
+    const exists = await db.query.shortlinks.findFirst({
+      where: eq(shortlinks.code, code),
+    })
+    if (exists) {
+      throw new Error(`Kode "${code}" sudah dipakai.`)
+    }
+
+    const [row] = await db
+      .insert(shortlinks)
+      .values({ code, url })
+      .returning({ id: shortlinks.id, code: shortlinks.code })
+    return row
+  })
+
+export const deleteShortlink = createServerFn({ method: 'POST' })
+  .validator((id: number) => z.number().int().parse(id))
+  .handler(async ({ data: id }) => {
+    await requireAdmin()
+    await db.delete(shortlinks).where(eq(shortlinks.id, id))
+    return { ok: true as const }
   })
