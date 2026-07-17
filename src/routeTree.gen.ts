@@ -9,38 +9,262 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as GalleryRouteImport } from './routes/gallery'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BlogIndexRouteImport } from './routes/blog.index'
+import { Route as DashboardLoginRouteImport } from './routes/dashboard/login'
+import { Route as DashboardAuthedRouteImport } from './routes/dashboard/_authed'
+import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as DashboardAuthedIndexRouteImport } from './routes/dashboard/_authed/index'
+import { Route as DashboardAuthedTimelineRouteImport } from './routes/dashboard/_authed/timeline'
+import { Route as DashboardAuthedTeamRouteImport } from './routes/dashboard/_authed/team'
+import { Route as DashboardAuthedStatsRouteImport } from './routes/dashboard/_authed/stats'
+import { Route as DashboardAuthedSettingsRouteImport } from './routes/dashboard/_authed/settings'
+import { Route as DashboardAuthedGalleryRouteImport } from './routes/dashboard/_authed/gallery'
+import { Route as DashboardAuthedPostsIndexRouteImport } from './routes/dashboard/_authed/posts.index'
+import { Route as DashboardAuthedPostsIdRouteImport } from './routes/dashboard/_authed/posts.$id'
 
+const GalleryRoute = GalleryRouteImport.update({
+  id: '/gallery',
+  path: '/gallery',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRouteRoute = DashboardRouteRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardLoginRoute = DashboardLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardAuthedRoute = DashboardAuthedRouteImport.update({
+  id: '/_authed',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/blog/$slug',
+  path: '/blog/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardAuthedIndexRoute = DashboardAuthedIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardAuthedRoute,
+} as any)
+const DashboardAuthedTimelineRoute = DashboardAuthedTimelineRouteImport.update({
+  id: '/timeline',
+  path: '/timeline',
+  getParentRoute: () => DashboardAuthedRoute,
+} as any)
+const DashboardAuthedTeamRoute = DashboardAuthedTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => DashboardAuthedRoute,
+} as any)
+const DashboardAuthedStatsRoute = DashboardAuthedStatsRouteImport.update({
+  id: '/stats',
+  path: '/stats',
+  getParentRoute: () => DashboardAuthedRoute,
+} as any)
+const DashboardAuthedSettingsRoute = DashboardAuthedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => DashboardAuthedRoute,
+} as any)
+const DashboardAuthedGalleryRoute = DashboardAuthedGalleryRouteImport.update({
+  id: '/gallery',
+  path: '/gallery',
+  getParentRoute: () => DashboardAuthedRoute,
+} as any)
+const DashboardAuthedPostsIndexRoute =
+  DashboardAuthedPostsIndexRouteImport.update({
+    id: '/posts/',
+    path: '/posts/',
+    getParentRoute: () => DashboardAuthedRoute,
+  } as any)
+const DashboardAuthedPostsIdRoute = DashboardAuthedPostsIdRouteImport.update({
+  id: '/posts/$id',
+  path: '/posts/$id',
+  getParentRoute: () => DashboardAuthedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteRouteWithChildren
+  '/about': typeof AboutRoute
+  '/contact': typeof ContactRoute
+  '/gallery': typeof GalleryRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/dashboard/login': typeof DashboardLoginRoute
+  '/blog/': typeof BlogIndexRoute
+  '/dashboard/gallery': typeof DashboardAuthedGalleryRoute
+  '/dashboard/settings': typeof DashboardAuthedSettingsRoute
+  '/dashboard/stats': typeof DashboardAuthedStatsRoute
+  '/dashboard/team': typeof DashboardAuthedTeamRoute
+  '/dashboard/timeline': typeof DashboardAuthedTimelineRoute
+  '/dashboard/': typeof DashboardAuthedIndexRoute
+  '/dashboard/posts/$id': typeof DashboardAuthedPostsIdRoute
+  '/dashboard/posts/': typeof DashboardAuthedPostsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardAuthedIndexRoute
+  '/about': typeof AboutRoute
+  '/contact': typeof ContactRoute
+  '/gallery': typeof GalleryRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/dashboard/login': typeof DashboardLoginRoute
+  '/blog': typeof BlogIndexRoute
+  '/dashboard/gallery': typeof DashboardAuthedGalleryRoute
+  '/dashboard/settings': typeof DashboardAuthedSettingsRoute
+  '/dashboard/stats': typeof DashboardAuthedStatsRoute
+  '/dashboard/team': typeof DashboardAuthedTeamRoute
+  '/dashboard/timeline': typeof DashboardAuthedTimelineRoute
+  '/dashboard/posts/$id': typeof DashboardAuthedPostsIdRoute
+  '/dashboard/posts': typeof DashboardAuthedPostsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteRouteWithChildren
+  '/about': typeof AboutRoute
+  '/contact': typeof ContactRoute
+  '/gallery': typeof GalleryRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/dashboard/_authed': typeof DashboardAuthedRouteWithChildren
+  '/dashboard/login': typeof DashboardLoginRoute
+  '/blog/': typeof BlogIndexRoute
+  '/dashboard/_authed/gallery': typeof DashboardAuthedGalleryRoute
+  '/dashboard/_authed/settings': typeof DashboardAuthedSettingsRoute
+  '/dashboard/_authed/stats': typeof DashboardAuthedStatsRoute
+  '/dashboard/_authed/team': typeof DashboardAuthedTeamRoute
+  '/dashboard/_authed/timeline': typeof DashboardAuthedTimelineRoute
+  '/dashboard/_authed/': typeof DashboardAuthedIndexRoute
+  '/dashboard/_authed/posts/$id': typeof DashboardAuthedPostsIdRoute
+  '/dashboard/_authed/posts/': typeof DashboardAuthedPostsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/about'
+    | '/contact'
+    | '/gallery'
+    | '/blog/$slug'
+    | '/dashboard/login'
+    | '/blog/'
+    | '/dashboard/gallery'
+    | '/dashboard/settings'
+    | '/dashboard/stats'
+    | '/dashboard/team'
+    | '/dashboard/timeline'
+    | '/dashboard/'
+    | '/dashboard/posts/$id'
+    | '/dashboard/posts/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/about'
+    | '/contact'
+    | '/gallery'
+    | '/blog/$slug'
+    | '/dashboard/login'
+    | '/blog'
+    | '/dashboard/gallery'
+    | '/dashboard/settings'
+    | '/dashboard/stats'
+    | '/dashboard/team'
+    | '/dashboard/timeline'
+    | '/dashboard/posts/$id'
+    | '/dashboard/posts'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/about'
+    | '/contact'
+    | '/gallery'
+    | '/blog/$slug'
+    | '/dashboard/_authed'
+    | '/dashboard/login'
+    | '/blog/'
+    | '/dashboard/_authed/gallery'
+    | '/dashboard/_authed/settings'
+    | '/dashboard/_authed/stats'
+    | '/dashboard/_authed/team'
+    | '/dashboard/_authed/timeline'
+    | '/dashboard/_authed/'
+    | '/dashboard/_authed/posts/$id'
+    | '/dashboard/_authed/posts/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
+  AboutRoute: typeof AboutRoute
+  ContactRoute: typeof ContactRoute
+  GalleryRoute: typeof GalleryRoute
+  BlogSlugRoute: typeof BlogSlugRoute
+  BlogIndexRoute: typeof BlogIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/gallery': {
+      id: '/gallery'
+      path: '/gallery'
+      fullPath: '/gallery'
+      preLoaderRoute: typeof GalleryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,12 +272,151 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/login': {
+      id: '/dashboard/login'
+      path: '/login'
+      fullPath: '/dashboard/login'
+      preLoaderRoute: typeof DashboardLoginRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/_authed': {
+      id: '/dashboard/_authed'
+      path: ''
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardAuthedRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/blog/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/_authed/': {
+      id: '/dashboard/_authed/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardAuthedIndexRouteImport
+      parentRoute: typeof DashboardAuthedRoute
+    }
+    '/dashboard/_authed/timeline': {
+      id: '/dashboard/_authed/timeline'
+      path: '/timeline'
+      fullPath: '/dashboard/timeline'
+      preLoaderRoute: typeof DashboardAuthedTimelineRouteImport
+      parentRoute: typeof DashboardAuthedRoute
+    }
+    '/dashboard/_authed/team': {
+      id: '/dashboard/_authed/team'
+      path: '/team'
+      fullPath: '/dashboard/team'
+      preLoaderRoute: typeof DashboardAuthedTeamRouteImport
+      parentRoute: typeof DashboardAuthedRoute
+    }
+    '/dashboard/_authed/stats': {
+      id: '/dashboard/_authed/stats'
+      path: '/stats'
+      fullPath: '/dashboard/stats'
+      preLoaderRoute: typeof DashboardAuthedStatsRouteImport
+      parentRoute: typeof DashboardAuthedRoute
+    }
+    '/dashboard/_authed/settings': {
+      id: '/dashboard/_authed/settings'
+      path: '/settings'
+      fullPath: '/dashboard/settings'
+      preLoaderRoute: typeof DashboardAuthedSettingsRouteImport
+      parentRoute: typeof DashboardAuthedRoute
+    }
+    '/dashboard/_authed/gallery': {
+      id: '/dashboard/_authed/gallery'
+      path: '/gallery'
+      fullPath: '/dashboard/gallery'
+      preLoaderRoute: typeof DashboardAuthedGalleryRouteImport
+      parentRoute: typeof DashboardAuthedRoute
+    }
+    '/dashboard/_authed/posts/': {
+      id: '/dashboard/_authed/posts/'
+      path: '/posts'
+      fullPath: '/dashboard/posts/'
+      preLoaderRoute: typeof DashboardAuthedPostsIndexRouteImport
+      parentRoute: typeof DashboardAuthedRoute
+    }
+    '/dashboard/_authed/posts/$id': {
+      id: '/dashboard/_authed/posts/$id'
+      path: '/posts/$id'
+      fullPath: '/dashboard/posts/$id'
+      preLoaderRoute: typeof DashboardAuthedPostsIdRouteImport
+      parentRoute: typeof DashboardAuthedRoute
+    }
   }
 }
 
+interface DashboardAuthedRouteChildren {
+  DashboardAuthedGalleryRoute: typeof DashboardAuthedGalleryRoute
+  DashboardAuthedSettingsRoute: typeof DashboardAuthedSettingsRoute
+  DashboardAuthedStatsRoute: typeof DashboardAuthedStatsRoute
+  DashboardAuthedTeamRoute: typeof DashboardAuthedTeamRoute
+  DashboardAuthedTimelineRoute: typeof DashboardAuthedTimelineRoute
+  DashboardAuthedIndexRoute: typeof DashboardAuthedIndexRoute
+  DashboardAuthedPostsIdRoute: typeof DashboardAuthedPostsIdRoute
+  DashboardAuthedPostsIndexRoute: typeof DashboardAuthedPostsIndexRoute
+}
+
+const DashboardAuthedRouteChildren: DashboardAuthedRouteChildren = {
+  DashboardAuthedGalleryRoute: DashboardAuthedGalleryRoute,
+  DashboardAuthedSettingsRoute: DashboardAuthedSettingsRoute,
+  DashboardAuthedStatsRoute: DashboardAuthedStatsRoute,
+  DashboardAuthedTeamRoute: DashboardAuthedTeamRoute,
+  DashboardAuthedTimelineRoute: DashboardAuthedTimelineRoute,
+  DashboardAuthedIndexRoute: DashboardAuthedIndexRoute,
+  DashboardAuthedPostsIdRoute: DashboardAuthedPostsIdRoute,
+  DashboardAuthedPostsIndexRoute: DashboardAuthedPostsIndexRoute,
+}
+
+const DashboardAuthedRouteWithChildren = DashboardAuthedRoute._addFileChildren(
+  DashboardAuthedRouteChildren,
+)
+
+interface DashboardRouteRouteChildren {
+  DashboardAuthedRoute: typeof DashboardAuthedRouteWithChildren
+  DashboardLoginRoute: typeof DashboardLoginRoute
+}
+
+const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
+  DashboardAuthedRoute: DashboardAuthedRouteWithChildren,
+  DashboardLoginRoute: DashboardLoginRoute,
+}
+
+const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
+  DashboardRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardRouteRoute: DashboardRouteRouteWithChildren,
+  AboutRoute: AboutRoute,
+  ContactRoute: ContactRoute,
+  GalleryRoute: GalleryRoute,
+  BlogSlugRoute: BlogSlugRoute,
+  BlogIndexRoute: BlogIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

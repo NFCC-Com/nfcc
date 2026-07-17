@@ -1,0 +1,10 @@
+<svg viewBox="0 0 480 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder gallery photo">
+  <rect width="480" height="320" fill="#0b1220" />
+  <g fill="none" stroke="#ea580c" stroke-opacity="0.4" stroke-width="1.5">
+    <polygon points="60,60 100,40 140,60 140,100 100,120 60,100" />
+    <polygon points="140,100 180,80 220,100 220,140 180,160 140,140" />
+    <polygon points="220,60 260,40 300,60 300,100 260,120 220,100" />
+  </g>
+  <circle cx="360" cy="220" r="70" fill="#1a2438" />
+  <circle cx="360" cy="220" r="70" fill="none" stroke="#fb923c" stroke-width="2" opacity="0.8" />
+</svg>
