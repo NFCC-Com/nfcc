@@ -30,8 +30,8 @@ pnpm dev               # http://localhost:3000
    - `DATABASE_URL` — the **transaction pooler** URL (port `6543`), used at runtime.
    - `DIRECT_URL` — the **session / direct** URL (port `5432`), used by `drizzle-kit` for migrations.
 3. **API** → Settings → API:
-   - `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY`.
-   - ⚠️ The service-role key is **server-only** — it is used solely in `src/server/admin.ts` and is never bundled to the client. Keep it secret.
+   - `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (`sb_publishable_…`), and `SUPABASE_SECRET_KEY` (`sb_secret_…`). (Legacy `SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY` names are still accepted as fallbacks.)
+   - ⚠️ The secret key is **server-only** — it is used solely in `src/server/admin.ts` and is never bundled to the client. Keep it secret.
 4. **Storage** → create a **public** bucket named `media` (or set `SUPABASE_STORAGE_BUCKET` to your bucket name). Image uploads from the dashboard land here.
 5. Copy `.env.example` → `.env` and fill in all of the above.
 

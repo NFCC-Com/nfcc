@@ -12,6 +12,30 @@ function requireEnv(name: string): string {
   return value
 }
 
+// New Supabase key names (sb_publishable_… / sb_secret_…) with fallback to the
+// legacy anon / service_role names.
+function requirePublishableKey(): string {
+  const value =
+    process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY
+  if (!value) {
+    throw new Error(
+      'SUPABASE_PUBLISHABLE_KEY is not set. Copy .env.example to .env and fill in your Supabase keys.',
+    )
+  }
+  return value
+}
+
+function requireSecretKey(): string {
+  const value =
+    process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!value) {
+    throw new Error(
+      'SUPABASE_SECRET_KEY is not set. It is server-only — set it in .env, never expose it to the client.',
+    )
+  }
+  return value
+}
+
 /**
  * Supabase client bound to the current request's cookies (via TanStack Start's
  * request-scoped cookie helpers). Uses the anon key + user session — safe for auth.
@@ -20,7 +44,7 @@ function requireEnv(name: string): string {
 export function getSupabaseServerClient() {
   return createServerClient(
     requireEnv('SUPABASE_URL'),
-    requireEnv('SUPABASE_ANON_KEY'),
+    requirePublishableKey(),
     {
       cookies: {
         getAll() {
@@ -50,11 +74,7 @@ export function getSupabaseServerClient() {
  * must never be imported into client code. Used for Storage uploads / privileged writes.
  */
 export function getSupabaseAdminClient() {
-  return createServerClient(
-    requireEnv('SUPABASE_URL'),
-    requireEnv('SUPABASE_SERVICE_ROLE_KEY'),
-    {
-      cookies: { getAll: () => [], setAll: () => {} },
-    },
-  )
+  return createServerClient(requireEnv('SUPABASE_URL'), requireSecretKey(), {
+    cookies: { getAll: () => [], setAll: () => {} },
+  })
 }
