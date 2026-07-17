@@ -12,35 +12,48 @@ export const PROGRAMS: Program[] = [
     icon: CrosshairIcon,
     title: 'Offensive Security',
     description:
-      'Recon, scanning, enumeration, exploitation — the core methodology behind every workshop and CTF we run.',
+      'Recon, scanning, enumeration, eksploitasi — metodologi inti di balik setiap workshop dan CTF yang kita adain.',
   },
   {
     icon: SwordIcon,
-    title: 'CTFs & Boot-to-Root',
+    title: 'CTF & Boot-to-Root',
     description:
-      'Regular hands-on challenges, from beginner-friendly boxes to timed hunt-and-report competitions.',
+      'Challenge hands-on rutin, dari box yang cocok buat pemula sampai kompetisi hunt-and-report berbatas waktu.',
   },
   {
     icon: UsersIcon,
-    title: 'Community & Events',
+    title: 'Komunitas & Event',
     description:
-      'Study groups, mentorship, and campus events that keep the community learning between sessions.',
+      'Kelompok belajar, mentorship, dan acara kampus yang bikin komunitas terus belajar di antara sesi.',
   },
 ]
 
-export function ProgramCard({ program }: { program: Program }) {
+export function ProgramCard({
+  program,
+  index,
+}: {
+  program: Program
+  index: number
+}) {
   const Icon = program.icon
   return (
-    <div className="rounded-xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
-      <span className="flex size-10 items-center justify-center rounded-lg bg-accent text-brand-orange-deep">
-        <Icon className="size-5" strokeWidth={2.25} />
-      </span>
-      <h3 className="mt-4 font-display text-lg font-semibold">
-        {program.title}
-      </h3>
-      <p className="mt-2 text-sm text-muted-foreground">
-        {program.description}
-      </p>
+    <div className="grid grid-cols-[2rem_1fr] gap-x-4 border-t border-border py-6 first:border-t-0 sm:grid-cols-[3.5rem_1fr] sm:gap-x-8 sm:py-8">
+      <div className="pt-1 font-mono text-xs text-muted-foreground/70 tabular-nums sm:text-sm">
+        {String(index + 1).padStart(2, '0')}
+      </div>
+      <div className="min-w-0">
+        <div className="flex items-center gap-3">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent text-brand-orange-deep">
+            <Icon className="size-4.5" strokeWidth={2.25} />
+          </span>
+          <h3 className="font-display text-lg font-semibold sm:text-2xl">
+            {program.title}
+          </h3>
+        </div>
+        <p className="mt-3 text-muted-foreground sm:max-w-xl sm:text-lg">
+          {program.description}
+        </p>
+      </div>
     </div>
   )
 }

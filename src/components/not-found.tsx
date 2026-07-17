@@ -10,17 +10,17 @@ export function NotFound() {
       <div className="relative page-wrap flex flex-col items-center gap-4">
         <div className="eyebrow flex items-center gap-2">
           <TerminalIcon className="size-3.5" />
-          404 — access denied
+          404 — akses ditolak
         </div>
         <h1 className="display-title text-5xl font-semibold sm:text-6xl">
-          Page not found
+          Halaman gak ditemukan
         </h1>
         <p className="max-w-md text-white/65">
-          This route doesn&apos;t exist — or someone hasn&apos;t deployed it
-          yet. Head back before you get flagged for enumeration.
+          Rute ini gak ada — atau mungkin belum di-deploy. Balik aja sebelum
+          kena flag enumeration.
         </p>
         <Button asChild size="lg" className="mt-2">
-          <Link to="/">Back to safety</Link>
+          <Link to="/">Balik ke tempat aman</Link>
         </Button>
       </div>
     </div>

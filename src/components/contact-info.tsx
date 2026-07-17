@@ -34,9 +34,9 @@ export function ContactInfo({ settings }: { settings: SiteSettings }) {
         <span className="flex size-10 items-center justify-center rounded-lg bg-accent text-brand-orange-deep">
           <MailIcon className="size-5" />
         </span>
-        <h3 className="mt-4 font-display text-lg font-semibold">Email us</h3>
+        <h3 className="mt-4 font-display text-lg font-semibold">Email</h3>
         <p className="mt-1 text-sm text-muted-foreground">
-          Questions about joining, partnerships, or workshops.
+          Pertanyaan seputar gabung, partnership, atau workshop.
         </p>
         <Button asChild className="mt-4" variant="outline">
           <a href={`mailto:${settings.contactEmail}`}>
@@ -49,7 +49,7 @@ export function ContactInfo({ settings }: { settings: SiteSettings }) {
         <span className="flex size-10 items-center justify-center rounded-lg bg-accent text-brand-orange-deep">
           <MapPinIcon className="size-5" />
         </span>
-        <h3 className="mt-4 font-display text-lg font-semibold">Find us</h3>
+        <h3 className="mt-4 font-display text-lg font-semibold">Lokasi</h3>
         <p className="mt-1 text-sm text-muted-foreground">
           STT Terpadu Nurul Fikri, Depok, Indonesia.
         </p>

@@ -1,4 +1,4 @@
-import { Link, useRouter } from '@tanstack/react-router'
+import { Link, useRouter, useRouterState } from '@tanstack/react-router'
 import {
   LayoutDashboardIcon,
   FileTextIcon,
@@ -8,45 +8,47 @@ import {
   BarChart3Icon,
   SettingsIcon,
   LogOutIcon,
-  ShieldIcon,
   ExternalLinkIcon,
+  LinkIcon,
 } from 'lucide-react'
 
-import { Button } from '#/components/ui/button.tsx'
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
+  useSidebar,
+} from '#/components/ui/sidebar.tsx'
 import { signOut } from '#/server/admin.ts'
 
-const NAV = [
-  {
-    to: '/dashboard',
-    label: 'Overview',
-    icon: LayoutDashboardIcon,
-    exact: true,
-  },
-  {
-    to: '/dashboard/posts',
-    label: 'Blog posts',
-    icon: FileTextIcon,
-    exact: false,
-  },
-  { to: '/dashboard/gallery', label: 'Gallery', icon: ImageIcon, exact: false },
-  { to: '/dashboard/team', label: 'Team', icon: UsersIcon, exact: false },
-  {
-    to: '/dashboard/timeline',
-    label: 'Timeline',
-    icon: MilestoneIcon,
-    exact: false,
-  },
-  { to: '/dashboard/stats', label: 'Stats', icon: BarChart3Icon, exact: false },
-  {
-    to: '/dashboard/settings',
-    label: 'Site settings',
-    icon: SettingsIcon,
-    exact: false,
-  },
+const NAV_MAIN = [
+  { to: '/dashboard', label: 'Ringkasan', icon: LayoutDashboardIcon, exact: true },
+]
+
+const NAV_CONTENT = [
+  { to: '/dashboard/posts', label: 'Post blog', icon: FileTextIcon },
+  { to: '/dashboard/gallery', label: 'Galeri', icon: ImageIcon },
+  { to: '/dashboard/team', label: 'Tim', icon: UsersIcon },
+  { to: '/dashboard/timeline', label: 'Timeline', icon: MilestoneIcon },
+  { to: '/dashboard/stats', label: 'Statistik', icon: BarChart3Icon },
+]
+
+const NAV_SITE = [
+  { to: '/dashboard/settings', label: 'Pengaturan situs', icon: SettingsIcon },
+  { to: '/dashboard/shortlinks', label: 'Shortlink', icon: LinkIcon },
 ] as const
 
-export function DashboardSidebar({ email }: { email: string }) {
+export function AppSidebar({ email }: { email: string }) {
   const router = useRouter()
+  const pathname = useRouterState({ select: (s) => s.location.pathname })
+  const { isMobile, setOpenMobile } = useSidebar()
 
   async function handleSignOut() {
     await signOut()
@@ -54,61 +56,127 @@ export function DashboardSidebar({ email }: { email: string }) {
     router.invalidate()
   }
 
+  function closeMobile() {
+    if (isMobile) setOpenMobile(false)
+  }
+
   return (
-    <aside className="flex h-full flex-col gap-1 border-r border-border bg-card px-3 py-4">
-      <Link
-        to="/dashboard"
-        className="flex items-center gap-2 px-2 py-2 font-display text-lg font-semibold"
-      >
-        <span className="flex size-8 items-center justify-center rounded-md bg-brand-navy text-brand-orange">
-          <ShieldIcon className="size-4.5" strokeWidth={2.25} />
-        </span>
-        NFCC Admin
-      </Link>
+    <Sidebar collapsible="icon">
+      <SidebarHeader>
+        <Link
+          to="/dashboard"
+          onClick={closeMobile}
+          className="flex items-center gap-2 px-2 pt-3 pb-2 font-display text-base font-semibold group-data-[collapsible=icon]:hidden"
+        >
+          <img src="/logo.png" alt="NFCC" className="size-7 shrink-0 rounded-md" />
+          NFCC Admin
+        </Link>
+        <Link
+          to="/dashboard"
+          onClick={closeMobile}
+          className="hidden items-center justify-center py-2 group-data-[collapsible=icon]:flex"
+        >
+          <img src="/logo.png" alt="NFCC" className="size-7 rounded-md" />
+        </Link>
+      </SidebarHeader>
 
-      <nav className="mt-4 flex flex-1 flex-col gap-1">
-        {NAV.map((item) => (
-          <Link
-            key={item.to}
-            to={item.to}
-            activeOptions={{ exact: item.exact }}
-            className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-            activeProps={{
-              className: 'bg-accent text-brand-orange-deep hover:bg-accent',
-            }}
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Utama</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {NAV_MAIN.map((item) => {
+                const active = 'exact' in item && item.exact
+                  ? pathname === item.to
+                  : pathname.startsWith(item.to)
+                return (
+                  <SidebarMenuItem key={item.to}>
+                    <SidebarMenuButton asChild isActive={active} tooltip={item.label}>
+                      <Link to={item.to} onClick={closeMobile}>
+                        <item.icon className="size-4" />
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Konten</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {NAV_CONTENT.map((item) => {
+                const active = pathname.startsWith(item.to)
+                return (
+                  <SidebarMenuItem key={item.to}>
+                    <SidebarMenuButton asChild isActive={active} tooltip={item.label}>
+                      <Link to={item.to} onClick={closeMobile}>
+                        <item.icon className="size-4" />
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Situs</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {NAV_SITE.map((item) => {
+                const active = pathname.startsWith(item.to)
+                return (
+                  <SidebarMenuItem key={item.to}>
+                    <SidebarMenuButton asChild isActive={active} tooltip={item.label}>
+                      <Link to={item.to} onClick={closeMobile}>
+                        <item.icon className="size-4" />
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild tooltip="Lihat situs">
+              <a href="/" target="_blank" rel="noreferrer">
+                <ExternalLinkIcon className="size-4" />
+                <span>Lihat situs</span>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+
+        <div className="mt-auto px-3 pb-2">
+          <p
+            className="truncate px-2 text-xs text-muted-foreground group-data-[collapsible=icon]:hidden"
+            title={email}
           >
-            <item.icon className="size-4" />
-            {item.label}
-          </Link>
-        ))}
-      </nav>
-
-      <div className="mt-auto flex flex-col gap-2 border-t border-border pt-3">
-        <a
-          href="/"
-          target="_blank"
-          rel="noreferrer"
-          className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
-        >
-          <ExternalLinkIcon className="size-4" />
-          View site
-        </a>
-        <div
-          className="truncate px-3 text-xs text-muted-foreground"
-          title={email}
-        >
-          {email}
+            {email}
+          </p>
+          <button
+            onClick={handleSignOut}
+            className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-2"
+          >
+            <LogOutIcon className="size-4 shrink-0" />
+            <span className="group-data-[collapsible=icon]:hidden">Keluar</span>
+          </button>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleSignOut}
-          className="justify-start"
-        >
-          <LogOutIcon className="size-4" />
-          Sign out
-        </Button>
-      </div>
-    </aside>
+      </SidebarFooter>
+
+      <SidebarRail />
+    </Sidebar>
   )
 }

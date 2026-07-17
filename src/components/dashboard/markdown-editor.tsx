@@ -40,7 +40,7 @@ export function MarkdownEditor({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className="min-h-[28rem] font-mono text-sm"
-          placeholder="# Write your post in markdown…"
+          placeholder="# Tulis post dalam markdown…"
         />
       </div>
       <div className="flex flex-col gap-2">

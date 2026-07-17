@@ -11,7 +11,7 @@ export type PostSummary = {
 }
 
 function formatDate(date: string) {
-  return new Date(date).toLocaleDateString('en-US', {
+  return new Date(date).toLocaleDateString('id-ID', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

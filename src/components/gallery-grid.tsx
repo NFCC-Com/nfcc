@@ -7,14 +7,14 @@ import { cn } from '#/lib/utils.ts'
 
 export function GalleryGrid({ entries }: { entries: GalleryItem[] }) {
   const tags = React.useMemo(
-    () => ['All', ...new Set(entries.map((entry) => entry.tag))],
+    () => ['Semua', ...new Set(entries.map((entry) => entry.tag))],
     [entries],
   )
-  const [activeTag, setActiveTag] = React.useState('All')
+  const [activeTag, setActiveTag] = React.useState('Semua')
   const [selected, setSelected] = React.useState<GalleryItem | null>(null)
 
   const filtered =
-    activeTag === 'All'
+    activeTag === 'Semua'
       ? entries
       : entries.filter((entry) => entry.tag === activeTag)
 
@@ -38,27 +38,30 @@ export function GalleryGrid({ entries }: { entries: GalleryItem[] }) {
         ))}
       </div>
 
-      <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-8 columns-1 gap-5 sm:columns-2 lg:columns-3">
         {filtered.map((entry) => (
           <button
             key={entry.id}
             type="button"
             onClick={() => setSelected(entry)}
-            className="group overflow-hidden rounded-xl border border-border bg-card text-left"
+            className="group relative mb-5 block w-full overflow-hidden rounded-xl text-left break-inside-avoid"
           >
-            <div className="aspect-[3/2] overflow-hidden">
-              <img
-                src={entry.image}
-                alt={entry.caption}
-                className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
-                loading="lazy"
-              />
-            </div>
-            <div className="p-4">
-              <Badge variant="outline" className="font-mono text-[0.65rem]">
+            <img
+              src={entry.image}
+              alt={entry.caption}
+              className="w-full rounded-xl object-cover transition-transform duration-300 group-hover:scale-105"
+              loading="lazy"
+            />
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent p-4 pt-10">
+              <Badge
+                variant="outline"
+                className="border-white/30 font-mono text-[0.65rem] text-white/90"
+              >
                 {entry.tag}
               </Badge>
-              <p className="mt-2 text-sm font-medium">{entry.caption}</p>
+              <p className="mt-2 text-sm font-medium text-white">
+                {entry.caption}
+              </p>
             </div>
           </button>
         ))}
@@ -71,11 +74,16 @@ export function GalleryGrid({ entries }: { entries: GalleryItem[] }) {
         <DialogContent className="sm:max-w-2xl">
           <DialogTitle>{selected?.caption}</DialogTitle>
           {selected && (
-            <img
-              src={selected.image}
-              alt={selected.caption}
-              className="w-full rounded-md"
-            />
+            <>
+              <img
+                src={selected.image}
+                alt={selected.caption}
+                className="w-full rounded-md"
+              />
+              <Badge variant="outline" className="font-mono text-[0.65rem]">
+                {selected.tag}
+              </Badge>
+            </>
           )}
         </DialogContent>
       </Dialog>

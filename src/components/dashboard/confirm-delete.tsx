@@ -15,8 +15,8 @@ import {
 export function ConfirmDelete({
   trigger,
   onConfirm,
-  title = 'Delete this item?',
-  description = 'This action cannot be undone.',
+  title = 'Hapus item ini?',
+  description = 'Aksi ini gak bisa dibalikin.',
 }: {
   trigger: ReactNode
   onConfirm: () => void
@@ -32,12 +32,12 @@ export function ConfirmDelete({
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>Batal</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             className="bg-destructive text-white hover:bg-destructive/90"
           >
-            Delete
+            Hapus
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

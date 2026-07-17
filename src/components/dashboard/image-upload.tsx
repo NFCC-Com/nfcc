@@ -22,7 +22,7 @@ function fileToBase64(file: File): Promise<string> {
 export function ImageUpload({
   value,
   onChange,
-  label = 'Image',
+  label = 'Gambar',
 }: {
   value: string
   onChange: (url: string) => void
@@ -42,12 +42,12 @@ export function ImageUpload({
       })
       if (result.ok) {
         onChange(result.url)
-        toast.success('Image uploaded')
+        toast.success('Gambar terupload')
       } else {
         toast.error(result.error)
       }
     } catch {
-      toast.error('Upload failed')
+      toast.error('Upload gagal')
     } finally {
       setUploading(false)
       if (inputRef.current) inputRef.current.value = ''
@@ -67,7 +67,7 @@ export function ImageUpload({
         <Input
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="Image URL, or upload →"
+          placeholder="URL gambar, atau upload →"
         />
         <input
           ref={inputRef}
@@ -83,7 +83,7 @@ export function ImageUpload({
           onClick={() => inputRef.current?.click()}
         >
           <UploadIcon className="size-4" />
-          {uploading ? 'Uploading…' : label}
+          {uploading ? 'Mengupload…' : label}
         </Button>
       </div>
     </div>
