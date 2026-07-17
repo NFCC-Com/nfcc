@@ -23,7 +23,7 @@ const POSTS = [
     excerpt:
       "A field guide to the four-phase methodology we teach in NFCC's Offensive Security Basic workshop: recon, scanning, enumeration, exploitation.",
     tags: ['offensive-security', 'methodology', 'workshop'],
-    author: 'NFCC Team',
+    author: 'Tim NFCC',
     publishedAt: new Date('2026-06-01'),
     body: `Offensive security isn't about breaking things for fun — it's a disciplined way of testing whether a system holds up under the same pressure a real attacker would apply, so it can be fixed before someone with worse intentions finds it first. Every legal engagement follows the same rough shape:
 
@@ -63,7 +63,7 @@ If you want hands-on practice with this exact flow, our Mini Workshop series wal
     excerpt:
       'The three misconfigurations we drilled in Pertemuan 3 — SUID abuse, NOPASSWD sudo, and kernel exploits — plus how to close each one off.',
     tags: ['privilege-escalation', 'linux', 'cheatsheet'],
-    author: 'NFCC Team',
+    author: 'Tim NFCC',
     publishedAt: new Date('2026-06-15'),
     body: `Getting a low-privilege shell is usually the easy part. Turning it into \`root\` is where most of a real engagement's time goes. Here are the three misconfigurations we cover in the Privilege Escalation session, and — just as important — how to fix each one.
 
@@ -111,7 +111,7 @@ Every privilege escalation vector here comes from the same root cause: something
     excerpt:
       'General field notes on the enumeration-to-privesc pipeline behind our Boot to Root session, without spoiling any specific box.',
     tags: ['ctf', 'boot-to-root', 'walkthrough'],
-    author: 'NFCC Team',
+    author: 'Tim NFCC',
     publishedAt: new Date('2026-06-22'),
     body: `"Boot to root" challenges hand you a booted machine and one goal: get to \`root\` (or \`Administrator\`). No hints about which service is vulnerable, no hand-holding. Here's the general shape most boxes follow — deliberately kept generic since spoiling an active box isn't the point.
 
@@ -171,7 +171,7 @@ const GALLERY = [
   {
     image: '/placeholders/gallery-2.svg',
     caption: 'Re-registration day for the offensive security series',
-    tag: 'Community',
+    tag: 'Komunitas',
     date: '2026-06-21',
     sortOrder: 4,
   },
@@ -188,21 +188,21 @@ const TEAM = [
   {
     name: 'Member One',
     role: 'Community Lead',
-    division: 'Core Team',
+    division: 'Tim Inti',
     photo: '/placeholders/avatar.svg',
     sortOrder: 0,
   },
   {
     name: 'Member Two',
     role: 'Vice Lead',
-    division: 'Core Team',
+    division: 'Tim Inti',
     photo: '/placeholders/avatar.svg',
     sortOrder: 1,
   },
   {
     name: 'Member Three',
     role: 'Secretary',
-    division: 'Core Team',
+    division: 'Tim Inti',
     photo: '/placeholders/avatar.svg',
     sortOrder: 2,
   },
@@ -246,9 +246,9 @@ const TEAM = [
 const TIMELINE = [
   {
     year: '—',
-    title: 'NFCC founded',
+    title: 'NFCC berdiri',
     description:
-      'Founded at STT Terpadu Nurul Fikri as a student community for hands-on cybersecurity practice. (Placeholder — replace with real founding date.)',
+      'Berdiri di STT Terpadu Nurul Fikri sebagai komunitas mahasiswa untuk praktik cybersecurity hands-on. (Placeholder — ganti dengan tanggal pendirian asli.)',
     sortOrder: 0,
   },
   {
@@ -275,10 +275,10 @@ const TIMELINE = [
 ]
 
 const STATS = [
-  { label: 'Active members', value: '80+', sortOrder: 0 },
-  { label: 'Workshops & CTFs run', value: '20+', sortOrder: 1 },
-  { label: 'Years active', value: '5', sortOrder: 2 },
-  { label: 'Partner events', value: '6', sortOrder: 3 },
+  { label: 'Anggota aktif', value: '80+', sortOrder: 0 },
+  { label: 'Workshop & CTF', value: '20+', sortOrder: 1 },
+  { label: 'Tahun aktif', value: '5', sortOrder: 2 },
+  { label: 'Event partner', value: '6', sortOrder: 3 },
 ]
 
 async function seedIfEmpty<T extends { length: number }>(

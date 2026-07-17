@@ -9,6 +9,21 @@ import {
   uniqueIndex,
 } from 'drizzle-orm/pg-core'
 
+export const shortlinks = pgTable(
+  'shortlinks',
+  {
+    id: serial('id').primaryKey(),
+    code: text('code').notNull(),
+    url: text('url').notNull(),
+    clicks: integer('clicks').notNull().default(0),
+    lastClickedAt: timestamp('last_clicked_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [uniqueIndex('shortlinks_code_idx').on(table.code)],
+)
+
 export const posts = pgTable(
   'posts',
   {
@@ -22,7 +37,7 @@ export const posts = pgTable(
       .array()
       .notNull()
       .default(sql`ARRAY[]::text[]`),
-    author: text('author').notNull().default('NFCC Team'),
+    author: text('author').notNull().default('Tim NFCC'),
     published: boolean('published').notNull().default(false),
     publishedAt: timestamp('published_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true })
@@ -39,7 +54,7 @@ export const galleryItems = pgTable('gallery_items', {
   id: serial('id').primaryKey(),
   image: text('image').notNull(),
   caption: text('caption').notNull().default(''),
-  tag: text('tag').notNull().default('General'),
+  tag: text('tag').notNull().default('Umum'),
   date: text('date').notNull().default(''),
   sortOrder: integer('sort_order').notNull().default(0),
   createdAt: timestamp('created_at', { withTimezone: true })
@@ -51,7 +66,7 @@ export const teamMembers = pgTable('team_members', {
   id: serial('id').primaryKey(),
   name: text('name').notNull(),
   role: text('role').notNull().default(''),
-  division: text('division').notNull().default('Core Team'),
+  division: text('division').notNull().default('Tim Inti'),
   photo: text('photo').notNull().default('/placeholders/avatar.svg'),
   sortOrder: integer('sort_order').notNull().default(0),
 })
@@ -92,3 +107,4 @@ export type TeamMember = typeof teamMembers.$inferSelect
 export type TimelineEntry = typeof timelineEntries.$inferSelect
 export type Stat = typeof stats.$inferSelect
 export type SiteSettings = typeof siteSettings.$inferSelect
+export type Shortlink = typeof shortlinks.$inferSelect
