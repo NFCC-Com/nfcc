@@ -14,6 +14,9 @@ import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from '#/components/ui/dialog.tsx'
 import { Input } from '#/components/ui/input.tsx'
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from '#/components/ui/table.tsx'
 import type { Shortlink } from '#/db/schema.ts'
 import { deleteShortlink, listShortlinks, saveShortlink } from '#/server/admin.ts'
 import { SkeletonTable } from '#/components/dashboard/skeletons.tsx'
@@ -57,8 +60,8 @@ function ShortlinkForm({ item, onDone }: { item?: Shortlink; onDone: () => void 
           await navigator.clipboard.writeText(url)
           toast.success(`Disalin: ${url}`)
         }
-        } catch (err: any) {
-          setServerError(err.message ?? 'Gagal menyimpan')
+      } catch (err: any) {
+        setServerError(err.message ?? 'Gagal menyimpan')
       }
     },
   })
@@ -88,7 +91,7 @@ function ShortlinkForm({ item, onDone }: { item?: Shortlink; onDone: () => void 
   )
 }
 
-export default function ShortlinksAdmin() {
+function ShortlinksAdmin() {
   const { rows, total, page, pageSize } = Route.useLoaderData()
   const navigate = useNavigate({ from: Route.fullPath })
   const router = useRouter()
@@ -116,41 +119,41 @@ export default function ShortlinksAdmin() {
         <p className="text-sm text-muted-foreground">Belum ada shortlink.</p>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-border bg-muted/50">
-              <tr>
-                <th className="px-4 py-3 font-medium">URL Pendek</th>
-                <th className="px-4 py-3 font-medium max-sm:hidden">Tujuan</th>
-                <th className="px-4 py-3 font-medium text-right">Klik</th>
-                <th className="px-4 py-3 font-medium max-md:hidden">Terakhir diklik</th>
-                <th className="px-4 py-3 font-medium text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>URL Pendek</TableHead>
+                <TableHead className="max-sm:hidden">Tujuan</TableHead>
+                <TableHead className="text-right">Klik</TableHead>
+                <TableHead className="max-md:hidden">Terakhir diklik</TableHead>
+                <TableHead className="text-right">Aksi</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {rows.map((sl: Shortlink) => (
-                <tr key={sl.id} className="border-b border-border last:border-0 hover:bg-muted/30">
-                  <td className="px-4 py-3">
+                <TableRow key={sl.id}>
+                  <TableCell>
                     <div className="flex items-center gap-2">
                       <LinkIcon className="size-3.5 text-muted-foreground shrink-0" />
-                      <span className="font-mono text-xs truncate max-w-[140px] sm:max-w-none">/{sl.code}</span>
+                      <span className="font-mono text-xs truncate max-w-35 sm:max-w-none">/{sl.code}</span>
                       <button type="button" className="shrink-0 text-muted-foreground hover:text-foreground" onClick={() => copyUrl(sl.code)} title="Salin URL"><CopyIcon className="size-3.5" /></button>
                       <a href={`/${sl.code}`} target="_blank" rel="noreferrer" className="shrink-0 text-muted-foreground hover:text-brand-orange" title="Buka"><ExternalLinkIcon className="size-3.5" /></a>
                     </div>
-                  </td>
-                  <td className="px-4 py-3 max-sm:hidden"><span className="truncate block max-w-[200px] text-muted-foreground" title={sl.url}>{sl.url}</span></td>
-                  <td className="px-4 py-3 text-right font-mono tabular-nums">{sl.clicks}</td>
-                  <td className="px-4 py-3 text-muted-foreground max-md:hidden">{sl.lastClickedAt ? new Date(sl.lastClickedAt).toLocaleString() : '\u2014'}</td>
-                  <td className="px-4 py-3 text-right">
+                  </TableCell>
+                  <TableCell className="max-sm:hidden"><span className="truncate block max-w-50 text-muted-foreground" title={sl.url}>{sl.url}</span></TableCell>
+                  <TableCell className="text-right font-mono tabular-nums">{sl.clicks}</TableCell>
+                  <TableCell className="text-muted-foreground max-md:hidden">{sl.lastClickedAt ? new Date(sl.lastClickedAt).toLocaleString() : '\u2014'}</TableCell>
+                  <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
                       <Button variant="ghost" size="icon-sm" onClick={() => { setQrItem(sl); setQrOpen(true) }} title="Kode QR"><QrCodeIcon className="size-4" /></Button>
                       <Button variant="ghost" size="icon-sm" onClick={() => { setEditing(sl); setOpen(true) }}><PencilIcon className="size-4" /></Button>
                       <ConfirmDelete trigger={<Button variant="ghost" size="icon-sm"><Trash2Icon className="size-4 text-destructive" /></Button>} onConfirm={() => handleDelete(sl.id)} />
                     </div>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
 

@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { and, asc, count, desc, eq } from 'drizzle-orm'
+import { and, asc, count, desc, eq, isNull, sql } from 'drizzle-orm'
 import { z } from 'zod'
 
 import { db } from '#/db/index.ts'
@@ -14,6 +14,7 @@ import {
 } from '#/db/schema.ts'
 import { getCurrentUser, requireAdmin } from '#/lib/auth.ts'
 import { renderMarkdown } from '#/lib/markdown.ts'
+import { formatPeriode, parsePeriodeFilter } from '#/lib/periode.ts'
 import { generateCode, isSafeTargetUrl, isValidCode } from '#/lib/shortlink.ts'
 import { getSsrClient, getSupabaseAdminClient } from '#/lib/supabase/server.ts'
 
@@ -247,7 +248,8 @@ const teamInput = z.object({
   name: z.string().min(1),
   role: z.string().default(''),
   division: z.string().default('Tim Inti'),
-  periode: z.string().default(''),
+  periodeStart: z.number().int().nullable().default(null),
+  periodeEnd: z.number().int().nullable().default(null),
   photo: z.string().default('/placeholders/avatar.svg'),
   instagram: z.string().default(''),
   linkedin: z.string().default(''),
@@ -288,11 +290,25 @@ export const listTeam = createServerFn({ method: 'GET' })
   .validator((data: z.input<typeof teamListInput>) => teamListInput.parse(data))
   .handler(async ({ data }) => {
     await requireAdmin()
+    const periodeFilter = data.periode ? parsePeriodeFilter(data.periode) : null
     const conditions = [
-      data.periode ? eq(teamMembers.periode, data.periode) : undefined,
+      periodeFilter && periodeFilter.start == null
+        ? isNull(teamMembers.periodeStart)
+        : undefined,
+      periodeFilter && periodeFilter.start != null
+        ? eq(teamMembers.periodeStart, periodeFilter.start)
+        : undefined,
+      periodeFilter && periodeFilter.start != null
+        ? periodeFilter.end == null
+          ? isNull(teamMembers.periodeEnd)
+          : eq(teamMembers.periodeEnd, periodeFilter.end)
+        : undefined,
       data.division ? eq(teamMembers.division, data.division) : undefined,
     ].filter((c) => c !== undefined)
     const where = conditions.length > 0 ? and(...conditions) : undefined
+
+    const periodeYearDesc = sql`${teamMembers.periodeStart} DESC NULLS LAST`
+    const periodeEndDesc = sql`${teamMembers.periodeEnd} DESC NULLS LAST`
 
     const [rows, [{ value: total }], periodeRows, divisionRows] =
       await Promise.all([
@@ -300,11 +316,23 @@ export const listTeam = createServerFn({ method: 'GET' })
           .select()
           .from(teamMembers)
           .where(where)
-          .orderBy(asc(teamMembers.sortOrder), asc(teamMembers.id))
+          .orderBy(
+            periodeYearDesc,
+            periodeEndDesc,
+            asc(teamMembers.division),
+            asc(teamMembers.sortOrder),
+            asc(teamMembers.id),
+          )
           .limit(TEAM_PAGE_SIZE)
           .offset((data.page - 1) * TEAM_PAGE_SIZE),
         db.select({ value: count() }).from(teamMembers).where(where),
-        db.selectDistinct({ periode: teamMembers.periode }).from(teamMembers),
+        db
+          .selectDistinct({
+            periodeStart: teamMembers.periodeStart,
+            periodeEnd: teamMembers.periodeEnd,
+          })
+          .from(teamMembers)
+          .orderBy(periodeYearDesc, periodeEndDesc),
         db
           .selectDistinct({ division: teamMembers.division })
           .from(teamMembers),
@@ -316,8 +344,8 @@ export const listTeam = createServerFn({ method: 'GET' })
       page: data.page,
       pageSize: TEAM_PAGE_SIZE,
       periodeOptions: periodeRows
-        .map((r) => r.periode)
-        .filter((p) => p.length > 0),
+        .map((r) => formatPeriode(r.periodeStart, r.periodeEnd))
+        .filter((p) => p !== 'Umum'),
       divisionOptions: divisionRows.map((r) => r.division),
     }
   })
@@ -428,6 +456,8 @@ const settingsInput = z.object({
   instagram: z.string(),
   website: z.string(),
   ctfUrl: z.string(),
+  discord: z.string().default(''),
+  github: z.string().default(''),
   contactEmail: z.string(),
   logoPhilosophy: z.string().default(''),
 })

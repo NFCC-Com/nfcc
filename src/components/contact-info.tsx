@@ -1,11 +1,11 @@
 import {
   MailIcon,
-  InstagramIcon,
   GlobeIcon,
   TerminalIcon,
   MapPinIcon,
 } from 'lucide-react'
 
+import { DiscordIcon, GithubIcon, InstagramIcon } from '#/components/brand-icons.tsx'
 import { Button } from '#/components/ui/button.tsx'
 import type { SiteSettings } from '#/db/schema.ts'
 
@@ -26,6 +26,12 @@ export function ContactInfo({ settings }: { settings: SiteSettings }) {
       href: settings.ctfUrl,
       icon: TerminalIcon,
     },
+    ...(settings.discord
+      ? [{ label: displayHandle(settings.discord), href: settings.discord, icon: DiscordIcon }]
+      : []),
+    ...(settings.github
+      ? [{ label: displayHandle(settings.github), href: settings.github, icon: GithubIcon }]
+      : []),
   ]
 
   return (
@@ -60,9 +66,11 @@ export function ContactInfo({ settings }: { settings: SiteSettings }) {
               href={channel.href}
               target="_blank"
               rel="noreferrer noopener"
-              className="inline-flex items-center gap-2 text-sm font-medium text-foreground hover:text-brand-orange"
+              className="group inline-flex items-center gap-2.5 text-sm font-medium text-foreground transition-colors hover:text-brand-orange"
             >
-              <channel.icon className="size-4" />
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-accent text-brand-orange-deep transition-colors group-hover:bg-brand-orange/15">
+                <channel.icon className="size-3.5" />
+              </span>
               {channel.label}
             </a>
           ))}

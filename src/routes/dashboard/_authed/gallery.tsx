@@ -84,7 +84,7 @@ function GalleryForm({ item, onDone }: { item?: GalleryItem; onDone: () => void 
   )
 }
 
-export default function GalleryAdmin() {
+function GalleryAdmin() {
   const { rows: items, total, page, pageSize } = Route.useLoaderData()
   const navigate = useNavigate({ from: Route.fullPath })
   const router = useRouter()
@@ -106,7 +106,7 @@ export default function GalleryAdmin() {
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {items.map((item) => (
             <div key={item.id} className="overflow-hidden rounded-xl border border-border bg-card">
-              <img src={item.image} alt={item.caption} className="aspect-[3/2] w-full object-cover" />
+              <img src={item.image} alt={item.caption} className="aspect-3/2 w-full object-cover" />
               <div className="p-3">
                 <div className="font-mono text-[0.65rem] tracking-wide text-brand-orange uppercase">{item.tag}</div>
                 <p className="mt-1 line-clamp-2 text-sm">{item.caption}</p>

@@ -22,6 +22,20 @@
       "when": 1784298791248,
       "tag": "0002_pale_iron_man",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1784378552482,
+      "tag": "0003_team_periode_start_end",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1784380540250,
+      "tag": "0004_exotic_swarm",
+      "breakpoints": true
     }
   ]
 }

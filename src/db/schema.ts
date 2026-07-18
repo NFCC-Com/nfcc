@@ -67,7 +67,8 @@ export const teamMembers = pgTable('team_members', {
   name: text('name').notNull(),
   role: text('role').notNull().default(''),
   division: text('division').notNull().default('Tim Inti'),
-  periode: text('periode').notNull().default(''),
+  periodeStart: integer('periode_start'),
+  periodeEnd: integer('periode_end'),
   photo: text('photo').notNull().default('/placeholders/avatar.svg'),
   instagram: text('instagram').notNull().default(''),
   linkedin: text('linkedin').notNull().default(''),
@@ -98,6 +99,8 @@ export const siteSettings = pgTable('site_settings', {
     .default('https://instagram.com/nfcc.id'),
   website: text('website').notNull().default('https://nfcc.my.id'),
   ctfUrl: text('ctf_url').notNull().default('https://ctf.nfcd.id'),
+  discord: text('discord').notNull().default(''),
+  github: text('github').notNull().default(''),
   contactEmail: text('contact_email').notNull().default('contact@nfcc.my.id'),
   logoPhilosophy: text('logo_philosophy').notNull().default(''),
   updatedAt: timestamp('updated_at', { withTimezone: true })

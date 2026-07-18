@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import { TimelineItem } from '#/components/timeline-item.tsx'
 import { TeamCard } from '#/components/team-card.tsx'
+import { formatPeriode } from '#/lib/periode.ts'
 import { getSettings, getTeam, getTimeline } from '#/server/content.ts'
 
 export const Route = createFileRoute('/about')({
@@ -28,10 +29,11 @@ export const Route = createFileRoute('/about')({
 
 function About() {
   const { team, timeline, settings } = Route.useLoaderData()
-  // Distinct periode (blank -> "Umum" bucket) in first-appearance order, each holding
-  // its own distinct-division breakdown.
-  const periodeKey = (p: string) => p || 'Umum'
-  const periodes = [...new Set(team.map((member) => periodeKey(member.periode)))]
+  // Rows arrive pre-sorted newest periode first (see getTeam), so distinct-in-
+  // appearance-order here already reads newest -> oldest, "Umum" last.
+  const periodes = [
+    ...new Set(team.map((member) => formatPeriode(member.periodeStart, member.periodeEnd))),
+  ]
 
   return (
     <>
@@ -117,7 +119,7 @@ function About() {
           <div className="mt-12 flex flex-col gap-16">
             {periodes.map((periode) => {
               const periodeMembers = team.filter(
-                (member) => periodeKey(member.periode) === periode,
+                (member) => formatPeriode(member.periodeStart, member.periodeEnd) === periode,
               )
               const divisions = [
                 ...new Set(periodeMembers.map((member) => member.division)),
@@ -125,7 +127,7 @@ function About() {
               return (
                 <div key={periode}>
                   <h3 className="font-mono text-sm tracking-wide text-brand-orange uppercase">
-                    Periode {periode}
+                    {periode === 'Umum' ? 'Umum' : `Periode ${periode}`}
                   </h3>
                   <div className="mt-8 flex flex-col gap-12">
                     {divisions.map((division) => {

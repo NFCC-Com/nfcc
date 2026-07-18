@@ -1,5 +1,4 @@
-import { GithubIcon, InstagramIcon, LinkedinIcon } from 'lucide-react'
-
+import { GithubIcon, InstagramIcon, LinkedinIcon } from '#/components/brand-icons.tsx'
 import { Avatar, AvatarFallback, AvatarImage } from '#/components/ui/avatar.tsx'
 import type { TeamMember } from '#/db/schema.ts'
 

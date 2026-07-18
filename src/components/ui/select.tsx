@@ -17,24 +17,14 @@ function SelectValue({
 }: SelectPrimitive.Value.Props & {
   placeholder?: string;
 }) {
-  if (!placeholder) {
-    return <SelectPrimitive.Value data-slot="select-value" {...props} />;
-  }
-
   return (
     <SelectPrimitive.Value
-      render={(_, { value }) => {
-        if (value) {
-          return <SelectPrimitive.Value data-slot="select-value" {...props} />;
-        }
-
-        // Placeholder
-        return (
-          <span data-slot="select-value" className="text-muted-foreground">
-            {placeholder}
-          </span>
-        );
-      }}
+      data-slot="select-value"
+      placeholder={
+        placeholder ? (
+          <span className="text-muted-foreground">{placeholder}</span>
+        ) : undefined
+      }
       {...props}
     />
   );
@@ -53,7 +43,7 @@ function SelectTrigger({
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        "border-input data-placeholder:text-muted-foreground focus-visible:ring-ring/50 dark:bg-input/30 dark:hover:bg-input/50 w-fit items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "border-input data-placeholder:text-muted-foreground focus-visible:ring-ring/50 dark:bg-input/30 dark:hover:bg-input/50 inline-flex w-fit items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
       )}
       {...props}

@@ -16,6 +16,8 @@ const settingsInput = z.object({
   instagram: z.string().min(1, 'Wajib diisi'),
   website: z.string().min(1, 'Wajib diisi'),
   ctfUrl: z.string().min(1, 'Wajib diisi'),
+  discord: z.string(),
+  github: z.string(),
   contactEmail: z.string().min(1, 'Wajib diisi'),
   logoPhilosophy: z.string(),
 })
@@ -27,7 +29,7 @@ export const Route = createFileRoute('/dashboard/_authed/settings')({
   loader: () => getSettings(),
 })
 
-export default function SettingsAdmin() {
+function SettingsAdmin() {
   const settings = Route.useLoaderData()
   const router = useRouter()
 
@@ -36,6 +38,8 @@ export default function SettingsAdmin() {
       instagram: settings.instagram,
       website: settings.website,
       ctfUrl: settings.ctfUrl,
+      discord: settings.discord,
+      github: settings.github,
       contactEmail: settings.contactEmail,
       logoPhilosophy: settings.logoPhilosophy,
     } satisfies z.input<typeof settingsInput>,
@@ -59,6 +63,12 @@ export default function SettingsAdmin() {
         </form.Field>
         <form.Field name="ctfUrl" validators={{ onChange: z.string().min(1, 'Wajib diisi') }}>
           {(f) => <FormField label="URL Platform CTF" errors={fieldErrors(f)}><Input value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} onBlur={f.handleBlur} /></FormField>}
+        </form.Field>
+        <form.Field name="discord">
+          {(f) => <FormField label="URL Discord"><Input value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} onBlur={f.handleBlur} /></FormField>}
+        </form.Field>
+        <form.Field name="github">
+          {(f) => <FormField label="URL GitHub"><Input value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} onBlur={f.handleBlur} /></FormField>}
         </form.Field>
         <form.Field name="contactEmail" validators={{ onChange: z.string().min(1, 'Wajib diisi') }}>
           {(f) => <FormField label="Email kontak" errors={fieldErrors(f)}><Input type="email" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} onBlur={f.handleBlur} /></FormField>}

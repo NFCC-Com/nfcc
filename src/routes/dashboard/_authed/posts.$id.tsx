@@ -45,7 +45,7 @@ export const Route = createFileRoute('/dashboard/_authed/posts/$id')({
   },
 })
 
-export default function PostEditor() {
+function PostEditor() {
   const { post } = Route.useLoaderData()
   const router = useRouter()
 

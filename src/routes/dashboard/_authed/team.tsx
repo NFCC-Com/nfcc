@@ -19,17 +19,19 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '#/components/ui/select.tsx'
 import type { TeamMember } from '#/db/schema.ts'
+import { formatPeriode } from '#/lib/periode.ts'
 import { deleteTeamMember, listTeam, saveTeamMember } from '#/server/admin.ts'
 import { SkeletonCardGrid } from '#/components/dashboard/skeletons.tsx'
 
-const ALL = '__all__'
+const ALL = 'all'
 
 const teamInput = z.object({
   id: z.number().int().optional(),
   name: z.string().min(1, 'Nama wajib diisi'),
   role: z.string().default(''),
   division: z.string().default('Tim Inti'),
-  periode: z.string().default(''),
+  periodeStart: z.number().int().nullable().default(null),
+  periodeEnd: z.number().int().nullable().default(null),
   photo: z.string().default('/placeholders/avatar.svg'),
   instagram: z.string().default(''),
   linkedin: z.string().default(''),
@@ -65,7 +67,8 @@ function TeamForm({ member, onDone }: { member?: TeamMember; onDone: () => void 
       name: member?.name ?? '',
       role: member?.role ?? '',
       division: member?.division ?? 'Tim Inti',
-      periode: member?.periode ?? '',
+      periodeStart: member?.periodeStart ?? null,
+      periodeEnd: member?.periodeEnd ?? null,
       photo: member?.photo ?? '/placeholders/avatar.svg',
       instagram: member?.instagram ?? '',
       linkedin: member?.linkedin ?? '',
@@ -92,9 +95,14 @@ function TeamForm({ member, onDone }: { member?: TeamMember; onDone: () => void 
           {(f) => <FormField label="Divisi"><Input value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} onBlur={f.handleBlur} /></FormField>}
         </form.Field>
       </div>
-      <form.Field name="periode">
-        {(f) => <FormField label="Periode"><Input placeholder="mis. 2024/2025" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} onBlur={f.handleBlur} /></FormField>}
-      </form.Field>
+      <div className="grid grid-cols-2 gap-4">
+        <form.Field name="periodeStart">
+          {(f) => <FormField label="Tahun mulai"><Input type="number" placeholder="mis. 2024" value={f.state.value ?? ''} onChange={(e) => f.handleChange(e.target.value ? Number(e.target.value) : null)} onBlur={f.handleBlur} /></FormField>}
+        </form.Field>
+        <form.Field name="periodeEnd">
+          {(f) => <FormField label="Tahun selesai (opsional)"><Input type="number" placeholder="mis. 2025" value={f.state.value ?? ''} onChange={(e) => f.handleChange(e.target.value ? Number(e.target.value) : null)} onBlur={f.handleBlur} /></FormField>}
+        </form.Field>
+      </div>
       <form.Field name="photo">
         {(f) => <FormField label="Foto"><ImageUpload value={f.state.value} onChange={(url) => f.handleChange(url)} /></FormField>}
       </form.Field>
@@ -119,7 +127,7 @@ function TeamForm({ member, onDone }: { member?: TeamMember; onDone: () => void 
   )
 }
 
-export default function TeamAdmin() {
+function TeamAdmin() {
   const { rows: members, total, page, pageSize, periodeOptions, divisionOptions } =
     Route.useLoaderData()
   const search = Route.useSearch()
@@ -144,15 +152,20 @@ export default function TeamAdmin() {
     })
   }
 
-  const periodeKey = (p: string) => p || 'Umum'
-  const periodes = [...new Set(members.map((m) => periodeKey(m.periode)))]
+  const periodes = [
+    ...new Set(members.map((m) => formatPeriode(m.periodeStart, m.periodeEnd))),
+  ]
 
   return (
     <div>
       <PageHeader title="Tim" description="Anggota yang tampil di halaman Tentang, dikelompokkan per periode lalu divisi." action={<Button onClick={() => { setEditing(undefined); setOpen(true) }}><PlusIcon className="size-4" /> Tambah anggota</Button>} />
 
       <div className="mb-6 flex flex-wrap gap-3">
-        <Select value={search.periode ?? ALL} onValueChange={(v) => v && setFilter('periode', v)}>
+        <Select
+          items={{ [ALL]: 'Semua periode', ...Object.fromEntries(periodeOptions.map((p) => [p, p])) }}
+          value={search.periode ?? ALL}
+          onValueChange={(v) => v && setFilter('periode', v)}
+        >
           <SelectTrigger className="w-40"><SelectValue placeholder="Semua periode" /></SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL}>Semua periode</SelectItem>
@@ -161,7 +174,11 @@ export default function TeamAdmin() {
             ))}
           </SelectContent>
         </Select>
-        <Select value={search.division ?? ALL} onValueChange={(v) => v && setFilter('division', v)}>
+        <Select
+          items={{ [ALL]: 'Semua divisi', ...Object.fromEntries(divisionOptions.map((d) => [d, d])) }}
+          value={search.division ?? ALL}
+          onValueChange={(v) => v && setFilter('division', v)}
+        >
           <SelectTrigger className="w-48"><SelectValue placeholder="Semua divisi" /></SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL}>Semua divisi</SelectItem>
@@ -178,12 +195,12 @@ export default function TeamAdmin() {
         <div className="flex flex-col gap-10">
           {periodes.map((periode) => {
             const periodeMembers = members.filter(
-              (m) => periodeKey(m.periode) === periode,
+              (m) => formatPeriode(m.periodeStart, m.periodeEnd) === periode,
             )
             return (
               <div key={periode}>
                 <h3 className="font-mono text-xs tracking-wide text-brand-orange uppercase">
-                  Periode {periode}
+                  {periode === 'Umum' ? 'Umum' : `Periode ${periode}`}
                 </h3>
                 <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
                   {periodeMembers.map((member) => (

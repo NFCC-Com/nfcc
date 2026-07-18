@@ -90,7 +90,7 @@ function StatForm({ item, onDone }: { item?: Stat; onDone: () => void }) {
   )
 }
 
-export default function StatsAdmin() {
+function StatsAdmin() {
   const { rows, total, page, pageSize } = Route.useLoaderData()
   const navigate = useNavigate({ from: Route.fullPath })
   const router = useRouter()

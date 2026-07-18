@@ -57,9 +57,7 @@ function PostsList() {
       />
 
       {posts.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          Belum ada post. Bikin yang pertama yuk.
-        </p>
+        <p className="text-sm text-muted-foreground">Belum ada post.</p>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border">
           <Table>

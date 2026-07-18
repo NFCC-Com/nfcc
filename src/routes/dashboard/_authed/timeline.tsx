@@ -79,7 +79,7 @@ function TimelineForm({ entry, onDone }: { entry?: TimelineEntry; onDone: () => 
   )
 }
 
-export default function TimelineAdmin() {
+function TimelineAdmin() {
   const { rows: entries, total, page, pageSize } = Route.useLoaderData()
   const navigate = useNavigate({ from: Route.fullPath })
   const router = useRouter()

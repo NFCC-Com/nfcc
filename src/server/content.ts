@@ -103,7 +103,13 @@ export const getTeam = createServerFn({ method: 'GET' }).handler(async () => {
   return db
     .select()
     .from(teamMembers)
-    .orderBy(asc(teamMembers.sortOrder), asc(teamMembers.id))
+    .orderBy(
+      sql`${teamMembers.periodeStart} DESC NULLS LAST`,
+      sql`${teamMembers.periodeEnd} DESC NULLS LAST`,
+      asc(teamMembers.division),
+      asc(teamMembers.sortOrder),
+      asc(teamMembers.id),
+    )
 })
 
 export const getTimeline = createServerFn({ method: 'GET' }).handler(
@@ -130,6 +136,8 @@ export const getSettings = createServerFn({ method: 'GET' }).handler(
         instagram: 'https://instagram.com/nfcc.id',
         website: 'https://nfcc.my.id',
         ctfUrl: 'https://ctf.nfcd.id',
+        discord: '',
+        github: '',
         contactEmail: 'contact@nfcc.my.id',
         logoPhilosophy: '',
         updatedAt: new Date(),

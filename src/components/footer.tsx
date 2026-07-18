@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router'
-import { InstagramIcon, GlobeIcon, TerminalIcon } from 'lucide-react'
+import { GlobeIcon, TerminalIcon } from 'lucide-react'
 
+import { DiscordIcon, GithubIcon, InstagramIcon } from '#/components/brand-icons.tsx'
 import type { SiteSettings } from '#/db/schema.ts'
 
 const LINKS = [
@@ -31,6 +32,12 @@ export function Footer({ settings }: { settings: SiteSettings }) {
       href: settings.ctfUrl,
       icon: TerminalIcon,
     },
+    ...(settings.discord
+      ? [{ label: displayHandle(settings.discord), href: settings.discord, icon: DiscordIcon }]
+      : []),
+    ...(settings.github
+      ? [{ label: displayHandle(settings.github), href: settings.github, icon: GithubIcon }]
+      : []),
   ]
 
   return (
@@ -76,9 +83,11 @@ export function Footer({ settings }: { settings: SiteSettings }) {
                     href={social.href}
                     target="_blank"
                     rel="noreferrer noopener"
-                    className="inline-flex items-center gap-2 hover:text-brand-orange-soft"
+                    className="group inline-flex items-center gap-2.5 transition-colors hover:text-brand-orange-soft"
                   >
-                    <social.icon className="size-4" />
+                    <span className="flex size-7 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/5 transition-colors group-hover:border-brand-orange-soft/40 group-hover:bg-brand-orange-soft/10">
+                      <social.icon className="size-3.5" />
+                    </span>
                     {social.label}
                   </a>
                 </li>

@@ -241,7 +241,11 @@ export function QrCodeCard({
               <h4 className="text-[0.7rem] font-semibold tracking-wider text-muted-foreground uppercase">
                 Download
               </h4>
-              <Select value={downloadSize} onValueChange={(v) => { if (v) setDownloadSize(v) }}>
+              <Select
+                items={{ '512': '512px', '800': '800px', '1024': '1024px', '2048': '2048px' }}
+                value={downloadSize}
+                onValueChange={(v) => { if (v) setDownloadSize(v) }}
+              >
                 <SelectTrigger className="h-9">
                   <SelectValue />
                 </SelectTrigger>

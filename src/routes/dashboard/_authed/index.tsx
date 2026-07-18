@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
+import type { LucideIcon } from 'lucide-react'
 import {
   FileTextIcon,
   ImageIcon,
@@ -21,6 +22,51 @@ export const Route = createFileRoute('/dashboard/_authed/')({
   loader: async () => ({ counts: await getDashboardCounts() }),
 })
 
+function StatCard({
+  to,
+  label,
+  icon: Icon,
+  number,
+  suffix,
+  value,
+}: {
+  to: string
+  label: string
+  icon: LucideIcon
+  number?: number
+  suffix?: string
+  value?: string
+}) {
+  return (
+    <Link
+      to={to}
+      className="group rounded-xl border border-border bg-card p-5 transition-shadow hover:shadow-md"
+    >
+      <span className="flex size-10 items-center justify-center rounded-lg bg-accent text-brand-orange-deep">
+        <Icon className="size-5" />
+      </span>
+      <div className="mt-4 text-sm text-muted-foreground">{label}</div>
+      <div className="font-display text-xl font-semibold tabular-nums group-hover:text-brand-orange">
+        {number != null ? (
+          <SlidingNumber
+            number={number}
+            inViewOnce
+            inViewMargin="-40px"
+            transition={{ stiffness: 200, damping: 20, mass: 0.4 }}
+          />
+        ) : (
+          value
+        )}
+      </div>
+      {suffix && (
+        <div className="mt-0.5 text-xs text-muted-foreground tabular-nums">
+          {suffix}
+        </div>
+      )}
+    </Link>
+  )
+}
+
 function Overview() {
   const { counts } = Route.useLoaderData()
 
@@ -31,7 +77,7 @@ function Overview() {
     { to: '/dashboard/timeline', label: 'Entri timeline', icon: MilestoneIcon, number: counts.timeline },
     { to: '/dashboard/stats', label: 'Statistik', icon: BarChart3Icon, number: counts.stats },
     { to: '/dashboard/shortlinks', label: 'Shortlink', icon: LinkIcon, number: counts.shortlinks },
-  ] as const
+  ]
 
   return (
     <div>
@@ -41,46 +87,14 @@ function Overview() {
       />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {statCards.map((card) => (
-          <Link
-            key={card.to}
-            to={card.to}
-            className="group rounded-xl border border-border bg-card p-5 transition-shadow hover:shadow-md"
-          >
-            <span className="flex size-10 items-center justify-center rounded-lg bg-accent text-brand-orange-deep">
-              <card.icon className="size-5" />
-            </span>
-            <div className="mt-4 text-sm text-muted-foreground">
-              {card.label}
-            </div>
-            <div className="font-display text-xl font-semibold tabular-nums group-hover:text-brand-orange">
-              <SlidingNumber
-                number={card.number}
-                inViewOnce
-                inViewMargin="-40px"
-                transition={{ stiffness: 200, damping: 20, mass: 0.4 }}
-              />
-            </div>
-            {'suffix' in card && card.suffix && (
-              <div className="mt-0.5 text-xs text-muted-foreground tabular-nums">
-                {card.suffix}
-              </div>
-            )}
-          </Link>
+          <StatCard key={card.to} {...card} />
         ))}
-        <Link
+        <StatCard
           to="/dashboard/settings"
-          className="group rounded-xl border border-border bg-card p-5 transition-shadow hover:shadow-md"
-        >
-          <span className="flex size-10 items-center justify-center rounded-lg bg-accent text-brand-orange-deep">
-            <SettingsIcon className="size-5" />
-          </span>
-          <div className="mt-4 text-sm text-muted-foreground">
-            Site settings
-          </div>
-          <div className="font-display text-xl font-semibold group-hover:text-brand-orange">
-            Edit tautan
-          </div>
-        </Link>
+          label="Site settings"
+          icon={SettingsIcon}
+          value="Edit tautan"
+        />
       </div>
     </div>
   )
