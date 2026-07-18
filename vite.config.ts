@@ -16,7 +16,22 @@ const config = defineConfig({
     devtools(),
     nitro({
       rollupConfig: { external: [/^@sentry\//] },
-      cloudflare: { wrangler: { name: 'nfcc' } },
+      cloudflare: {
+        wrangler: {
+          name: 'nfcc',
+          observability: {
+            enabled: true,
+            logs: { enabled: true, invocation_logs: true },
+          },
+          hyperdrive: [
+            {
+              binding: 'HYPERDRIVE',
+              id: process.env.CF_HYPERDRIVE_ID || 'daca07a30b8841f6bee2ee0a5e758c21',
+              localConnectionString: process.env.DATABASE_URL,
+            },
+          ],
+        },
+      },
     }),
     tailwindcss(),
     tanstackStart(),
