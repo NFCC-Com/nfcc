@@ -42,13 +42,14 @@ export const Route = createRootRoute({
       },
       {
         rel: 'icon',
-        href: '/favicon.svg',
-        type: 'image/svg+xml',
+        href: '/favicon.ico',
+        sizes: '16x16 32x32 48x48',
       },
       {
         rel: 'icon',
-        href: '/favicon.ico',
-        sizes: '32x32',
+        href: '/logo.png',
+        type: 'image/png',
+        sizes: '256x256',
       },
       {
         rel: 'apple-touch-icon',
