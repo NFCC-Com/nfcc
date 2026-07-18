@@ -11,8 +11,12 @@ import { FormField, fieldErrors } from '#/components/dashboard/form-field.tsx'
 import { Pagination } from '#/components/pagination.tsx'
 import { Button } from '#/components/ui/button.tsx'
 import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
-} from '#/components/ui/dialog.tsx'
+  ResponsiveDialog as Dialog,
+  ResponsiveDialogContent as DialogContent,
+  ResponsiveDialogFooter as DialogFooter,
+  ResponsiveDialogHeader as DialogHeader,
+  ResponsiveDialogTitle as DialogTitle,
+} from '#/components/dashboard/responsive-dialog.tsx'
 import { Input } from '#/components/ui/input.tsx'
 import { Textarea } from '#/components/ui/textarea.tsx'
 import type { TimelineEntry } from '#/db/schema.ts'
@@ -100,7 +104,7 @@ function TimelineAdmin() {
       ) : (
         <div className="flex flex-col gap-3">
           {entries.map((entry: TimelineEntry) => (
-            <div key={entry.id} className="flex items-start justify-between gap-4 rounded-xl border border-border bg-card p-4">
+            <div key={entry.id} className="flex items-start justify-between gap-4 rounded-xl border border-border bg-card p-4 transition-shadow hover:shadow-md">
               <div className="min-w-0">
                 <div className="font-mono text-xs tracking-wide text-brand-orange uppercase">{entry.year || '\u2014'}</div>
                 <div className="font-display font-semibold">{entry.title}</div>

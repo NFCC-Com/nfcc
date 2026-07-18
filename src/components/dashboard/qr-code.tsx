@@ -1,5 +1,6 @@
 import * as React from 'react'
 import QRCodeLib from 'qrcode'
+import QRCode from 'react-qr-code'
 import { DownloadIcon, PaletteIcon } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -113,26 +114,7 @@ async function downloadPng(
   link.click()
 }
 
-function useCanvasSize(ref: React.RefObject<HTMLDivElement | null>, maxSize: number) {
-  const [size, setSize] = React.useState(maxSize)
-
-  React.useEffect(() => {
-    const el = ref.current
-    if (!el) return
-
-    const measure = () => {
-      const w = el.clientWidth
-      setSize(Math.min(maxSize, w - 4))
-    }
-    measure()
-
-    const ro = new ResizeObserver(measure)
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [ref, maxSize])
-
-  return size
-}
+const QR_SIZE = 280
 
 export function QrCodeCard({
   shortUrl,
@@ -141,8 +123,6 @@ export function QrCodeCard({
   shortUrl: string
   code: string
 }) {
-  const wrapperRef = React.useRef<HTMLDivElement>(null)
-  const canvasRef = React.useRef<HTMLCanvasElement>(null)
   const [fgColor, setFgColor] = React.useState('#0b1220')
   const [bgColor, setBgColor] = React.useState('#ffffff')
   const [logoSize, setLogoSize] = React.useState(25)
@@ -152,15 +132,10 @@ export function QrCodeCard({
   const [downloading, setDownloading] = React.useState(false)
   const [customizeOpen, setCustomizeOpen] = React.useState(false)
 
-  const canvasSize = useCanvasSize(wrapperRef, 280)
-
-  React.useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas || canvasSize === 0) return
-    canvas.style.width = `${canvasSize}px`
-    canvas.style.height = `${canvasSize}px`
-    renderQrToCanvas(canvas, shortUrl, canvasSize, fgColor, bgColor, logoSize, bgPadding, bgOpacity)
-  }, [shortUrl, fgColor, bgColor, logoSize, bgPadding, bgOpacity, canvasSize])
+  // Same proportions as the canvas export in renderQrToCanvas, expressed as
+  // percentages of the SVG's own width so the overlay scales with it.
+  const bgDiameterPct = logoSize + bgPadding
+  const logoDiameterPct = logoSize * 0.8
 
   async function handleDownload() {
     setDownloading(true)
@@ -176,8 +151,35 @@ export function QrCodeCard({
 
   return (
     <div className="flex flex-col gap-4">
-      <Card ref={wrapperRef} className="flex items-center justify-center bg-white p-3">
-        <canvas ref={canvasRef} className="shrink-0" />
+      <Card className="flex items-center justify-center bg-white p-3">
+        <div className="relative aspect-square w-full max-w-70">
+          <QRCode
+            value={shortUrl}
+            size={QR_SIZE}
+            level="H"
+            bgColor={bgColor}
+            fgColor={fgColor}
+            viewBox={`0 0 ${QR_SIZE} ${QR_SIZE}`}
+            style={{ height: 'auto', width: '100%' }}
+          />
+          {bgPadding > 0 && (
+            <div
+              className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+              style={{
+                width: `${bgDiameterPct}%`,
+                height: `${bgDiameterPct}%`,
+                backgroundColor: bgColor,
+                opacity: bgOpacity / 100,
+              }}
+            />
+          )}
+          <div
+            className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+            style={{ width: `${logoDiameterPct}%`, height: `${logoDiameterPct}%` }}
+          >
+            <img src="/logo.png" alt="" className="h-full w-full object-contain" />
+          </div>
+        </div>
       </Card>
 
       <div className="flex flex-col gap-2 sm:flex-row">

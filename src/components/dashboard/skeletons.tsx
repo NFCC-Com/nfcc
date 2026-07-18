@@ -1,4 +1,5 @@
 import { Skeleton } from '#/components/ui/skeleton.tsx'
+import { cn } from '#/lib/utils.ts'
 
 export function SkeletonTable({ rows = 5 }: { rows?: number }) {
   return (
@@ -20,9 +21,21 @@ export function SkeletonTable({ rows = 5 }: { rows?: number }) {
   )
 }
 
-export function SkeletonCardGrid({ cards = 6 }: { cards?: number }) {
+const GRID_COLS = {
+  2: 'sm:grid-cols-2',
+  3: 'sm:grid-cols-2 lg:grid-cols-3',
+  4: 'grid-cols-2 sm:grid-cols-4',
+} as const
+
+export function SkeletonCardGrid({
+  cards = 6,
+  cols = 3,
+}: {
+  cards?: number
+  cols?: 2 | 3 | 4
+}) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className={cn('grid gap-4', GRID_COLS[cols])}>
       {Array.from({ length: cards }).map((_, i) => (
         <div
           key={i}

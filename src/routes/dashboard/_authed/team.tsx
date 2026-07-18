@@ -12,8 +12,12 @@ import { FormField, fieldErrors } from '#/components/dashboard/form-field.tsx'
 import { Pagination } from '#/components/pagination.tsx'
 import { Button } from '#/components/ui/button.tsx'
 import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
-} from '#/components/ui/dialog.tsx'
+  ResponsiveDialog as Dialog,
+  ResponsiveDialogContent as DialogContent,
+  ResponsiveDialogFooter as DialogFooter,
+  ResponsiveDialogHeader as DialogHeader,
+  ResponsiveDialogTitle as DialogTitle,
+} from '#/components/dashboard/responsive-dialog.tsx'
 import { Input } from '#/components/ui/input.tsx'
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -204,7 +208,7 @@ function TeamAdmin() {
                 </h3>
                 <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
                   {periodeMembers.map((member) => (
-                    <div key={member.id} className="rounded-xl border border-border bg-card p-4 text-center">
+                    <div key={member.id} className="rounded-xl border border-border bg-card p-4 text-center transition-shadow hover:shadow-md">
                       <img src={member.photo} alt={member.name} className="mx-auto size-16 rounded-full object-cover" />
                       <div className="mt-2 font-display font-semibold">{member.name}</div>
                       <div className="text-sm text-brand-orange">{member.role}</div>

@@ -11,12 +11,12 @@ import { FormField, fieldErrors } from '#/components/dashboard/form-field.tsx'
 import { Pagination } from '#/components/pagination.tsx'
 import { Button } from '#/components/ui/button.tsx'
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '#/components/ui/dialog.tsx'
+  ResponsiveDialog as Dialog,
+  ResponsiveDialogContent as DialogContent,
+  ResponsiveDialogFooter as DialogFooter,
+  ResponsiveDialogHeader as DialogHeader,
+  ResponsiveDialogTitle as DialogTitle,
+} from '#/components/dashboard/responsive-dialog.tsx'
 import { Input } from '#/components/ui/input.tsx'
 import type { Stat } from '#/db/schema.ts'
 import { deleteStat, listStats, saveStat } from '#/server/admin.ts'
@@ -111,7 +111,7 @@ function StatsAdmin() {
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {rows.map((stat: Stat) => (
-            <div key={stat.id} className="rounded-xl border border-border bg-card p-4">
+            <div key={stat.id} className="rounded-xl border border-border bg-card p-4 transition-shadow hover:shadow-md">
               <div className="font-display text-2xl font-semibold text-brand-orange">{stat.value}</div>
               <div className="mt-1 text-sm text-muted-foreground">{stat.label}</div>
               <div className="mt-3 flex gap-1">

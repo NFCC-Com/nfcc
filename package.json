@@ -45,6 +45,7 @@
     "react": "^19.2.7",
     "react-colorful": "^5.8.0",
     "react-dom": "^19.2.7",
+    "react-qr-code": "^2.2.0",
     "react-use-measure": "^2.1.7",
     "rehype-pretty-code": "^0.14.4",
     "rehype-stringify": "^10.0.1",

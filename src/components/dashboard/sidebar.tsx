@@ -1,4 +1,5 @@
 import { Link, useRouter, useRouterState } from '@tanstack/react-router'
+import type { LucideIcon } from 'lucide-react'
 import {
   LayoutDashboardIcon,
   FileTextIcon,
@@ -28,36 +29,93 @@ import {
 } from '#/components/ui/sidebar.tsx'
 import { signOut } from '#/server/admin.ts'
 
-const NAV_MAIN = [
-  { to: '/dashboard', label: 'Ringkasan', icon: LayoutDashboardIcon, exact: true },
+type NavItem = {
+  to: string
+  label: string
+  icon: LucideIcon
+  exact?: boolean
+}
+
+const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
+  {
+    label: 'Utama',
+    items: [
+      { to: '/dashboard', label: 'Ringkasan', icon: LayoutDashboardIcon, exact: true },
+    ],
+  },
+  {
+    label: 'Konten',
+    items: [
+      { to: '/dashboard/posts', label: 'Post blog', icon: FileTextIcon },
+      { to: '/dashboard/gallery', label: 'Galeri', icon: ImageIcon },
+      { to: '/dashboard/team', label: 'Tim', icon: UsersIcon },
+      { to: '/dashboard/timeline', label: 'Timeline', icon: MilestoneIcon },
+      { to: '/dashboard/stats', label: 'Statistik', icon: BarChart3Icon },
+    ],
+  },
+  {
+    label: 'Situs',
+    items: [
+      { to: '/dashboard/settings', label: 'Pengaturan situs', icon: SettingsIcon },
+      { to: '/dashboard/shortlinks', label: 'Shortlink', icon: LinkIcon },
+    ],
+  },
 ]
 
-const NAV_CONTENT = [
-  { to: '/dashboard/posts', label: 'Post blog', icon: FileTextIcon },
-  { to: '/dashboard/gallery', label: 'Galeri', icon: ImageIcon },
-  { to: '/dashboard/team', label: 'Tim', icon: UsersIcon },
-  { to: '/dashboard/timeline', label: 'Timeline', icon: MilestoneIcon },
-  { to: '/dashboard/stats', label: 'Statistik', icon: BarChart3Icon },
-]
+function isNavItemActive(item: NavItem, pathname: string) {
+  return item.exact ? pathname === item.to : pathname.startsWith(item.to)
+}
 
-const NAV_SITE = [
-  { to: '/dashboard/settings', label: 'Pengaturan situs', icon: SettingsIcon },
-  { to: '/dashboard/shortlinks', label: 'Shortlink', icon: LinkIcon },
-] as const
+function NavGroup({
+  label,
+  items,
+  pathname,
+  onNavigate,
+}: {
+  label: string
+  items: NavItem[]
+  pathname: string
+  onNavigate: () => void
+}) {
+  return (
+    <SidebarGroup>
+      <SidebarGroupLabel>{label}</SidebarGroupLabel>
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {items.map((item) => (
+            <SidebarMenuItem key={item.to}>
+              <SidebarMenuButton
+                asChild
+                isActive={isNavItemActive(item, pathname)}
+                tooltip={item.label}
+              >
+                <Link to={item.to} onClick={onNavigate}>
+                  <item.icon className="size-4" />
+                  <span>{item.label}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
+  )
+}
 
 export function AppSidebar({ email }: { email: string }) {
   const router = useRouter()
   const pathname = useRouterState({ select: (s) => s.location.pathname })
   const { isMobile, setOpenMobile } = useSidebar()
 
+  function closeMobile() {
+    if (isMobile) setOpenMobile(false)
+  }
+
   async function handleSignOut() {
+    closeMobile()
     await signOut()
     await router.navigate({ to: '/dashboard/login' })
     router.invalidate()
-  }
-
-  function closeMobile() {
-    if (isMobile) setOpenMobile(false)
   }
 
   return (
@@ -81,77 +139,22 @@ export function AppSidebar({ email }: { email: string }) {
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Utama</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {NAV_MAIN.map((item) => {
-                const active = 'exact' in item && item.exact
-                  ? pathname === item.to
-                  : pathname.startsWith(item.to)
-                return (
-                  <SidebarMenuItem key={item.to}>
-                    <SidebarMenuButton asChild isActive={active} tooltip={item.label}>
-                      <Link to={item.to} onClick={closeMobile}>
-                        <item.icon className="size-4" />
-                        <span>{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Konten</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {NAV_CONTENT.map((item) => {
-                const active = pathname.startsWith(item.to)
-                return (
-                  <SidebarMenuItem key={item.to}>
-                    <SidebarMenuButton asChild isActive={active} tooltip={item.label}>
-                      <Link to={item.to} onClick={closeMobile}>
-                        <item.icon className="size-4" />
-                        <span>{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Situs</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {NAV_SITE.map((item) => {
-                const active = pathname.startsWith(item.to)
-                return (
-                  <SidebarMenuItem key={item.to}>
-                    <SidebarMenuButton asChild isActive={active} tooltip={item.label}>
-                      <Link to={item.to} onClick={closeMobile}>
-                        <item.icon className="size-4" />
-                        <span>{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {NAV_GROUPS.map((group) => (
+          <NavGroup
+            key={group.label}
+            label={group.label}
+            items={group.items}
+            pathname={pathname}
+            onNavigate={closeMobile}
+          />
+        ))}
       </SidebarContent>
 
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip="Lihat situs">
-              <a href="/" target="_blank" rel="noreferrer">
+              <a href="/" target="_blank" rel="noreferrer" onClick={closeMobile}>
                 <ExternalLinkIcon className="size-4" />
                 <span>Lihat situs</span>
               </a>

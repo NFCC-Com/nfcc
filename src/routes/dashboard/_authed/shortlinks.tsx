@@ -8,19 +8,25 @@ import { toast } from 'sonner'
 import { PageHeader } from '#/components/dashboard/page-header.tsx'
 import { ConfirmDelete } from '#/components/dashboard/confirm-delete.tsx'
 import { FormField, fieldErrors } from '#/components/dashboard/form-field.tsx'
+import { ViewToggle } from '#/components/dashboard/view-toggle.tsx'
 import { Pagination } from '#/components/pagination.tsx'
 import { Button } from '#/components/ui/button.tsx'
 import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
-} from '#/components/ui/dialog.tsx'
+  ResponsiveDialog as Dialog,
+  ResponsiveDialogContent as DialogContent,
+  ResponsiveDialogFooter as DialogFooter,
+  ResponsiveDialogHeader as DialogHeader,
+  ResponsiveDialogTitle as DialogTitle,
+} from '#/components/dashboard/responsive-dialog.tsx'
 import { Input } from '#/components/ui/input.tsx'
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '#/components/ui/table.tsx'
 import type { Shortlink } from '#/db/schema.ts'
 import { deleteShortlink, listShortlinks, saveShortlink } from '#/server/admin.ts'
-import { SkeletonTable } from '#/components/dashboard/skeletons.tsx'
+import { SkeletonCardGrid, SkeletonTable } from '#/components/dashboard/skeletons.tsx'
 import { QrCodeCard } from '#/components/dashboard/qr-code.tsx'
+import { useViewMode } from '#/lib/use-view-mode.ts'
 
 const shortlinksSearch = z.object({ page: z.number().int().min(1).catch(1).default(1) })
 
@@ -33,11 +39,16 @@ const shortlinkInput = z.object({
 export const Route = createFileRoute('/dashboard/_authed/shortlinks')({
   component: ShortlinksAdmin,
   pendingMs: 200,
-  pendingComponent: () => <SkeletonTable />,
+  pendingComponent: ShortlinksPending,
   validateSearch: shortlinksSearch,
   loaderDeps: ({ search }) => ({ page: search.page }),
   loader: ({ deps }) => listShortlinks({ data: deps }),
 })
+
+function ShortlinksPending() {
+  const [mode] = useViewMode()
+  return mode === 'cards' ? <SkeletonCardGrid /> : <SkeletonTable />
+}
 
 function ShortlinkForm({ item, onDone }: { item?: Shortlink; onDone: () => void }) {
   const router = useRouter()
@@ -99,6 +110,7 @@ function ShortlinksAdmin() {
   const [editing, setEditing] = React.useState<Shortlink | undefined>()
   const [qrOpen, setQrOpen] = React.useState(false)
   const [qrItem, setQrItem] = React.useState<Shortlink | null>(null)
+  const [viewMode, setViewMode] = useViewMode()
 
   async function handleDelete(id: number) {
     await deleteShortlink({ data: id })
@@ -114,9 +126,57 @@ function ShortlinksAdmin() {
 
   return (
     <div>
-      <PageHeader title="Shortlink" description="Bikin URL pendek yang redirect ke mana aja." action={<Button onClick={() => { setEditing(undefined); setOpen(true) }}><PlusIcon className="size-4" /> Shortlink baru</Button>} />
+      <PageHeader
+        title="Shortlink"
+        description="Bikin URL pendek yang redirect ke mana aja."
+        action={
+          <div className="flex items-center gap-2">
+            <ViewToggle value={viewMode} onChange={setViewMode} />
+            <Button onClick={() => { setEditing(undefined); setOpen(true) }}><PlusIcon className="size-4" /> Shortlink baru</Button>
+          </div>
+        }
+      />
       {rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">Belum ada shortlink.</p>
+      ) : viewMode === 'cards' ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {rows.map((sl: Shortlink) => (
+            <div key={sl.id} className="rounded-xl border border-border bg-card p-4 transition-shadow hover:shadow-md">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex min-w-0 items-center gap-1.5">
+                  <LinkIcon className="size-3.5 shrink-0 text-muted-foreground" />
+                  <span className="truncate font-mono text-sm font-semibold">/{sl.code}</span>
+                </div>
+                <div className="flex shrink-0 gap-0.5">
+                  <Button variant="ghost" size="icon-sm" onClick={() => copyUrl(sl.code)} title="Salin URL">
+                    <CopyIcon className="size-3.5" />
+                  </Button>
+                  <Button asChild variant="ghost" size="icon-sm" title="Buka">
+                    <a href={`/${sl.code}`} target="_blank" rel="noreferrer">
+                      <ExternalLinkIcon className="size-3.5" />
+                    </a>
+                  </Button>
+                </div>
+              </div>
+              <p className="mt-2 truncate text-sm text-muted-foreground" title={sl.url}>{sl.url}</p>
+              <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span className="font-mono font-medium tabular-nums text-foreground">{sl.clicks}</span>
+                <span>klik</span>
+                <span aria-hidden className="text-border">&bull;</span>
+                <span className="truncate">
+                  {sl.lastClickedAt
+                    ? new Date(sl.lastClickedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+                    : 'Belum pernah diklik'}
+                </span>
+              </div>
+              <div className="mt-3 flex justify-end gap-1 border-t border-border pt-3">
+                <Button variant="ghost" size="icon-sm" onClick={() => { setQrItem(sl); setQrOpen(true) }} title="Kode QR"><QrCodeIcon className="size-4" /></Button>
+                <Button variant="ghost" size="icon-sm" onClick={() => { setEditing(sl); setOpen(true) }}><PencilIcon className="size-4" /></Button>
+                <ConfirmDelete trigger={<Button variant="ghost" size="icon-sm"><Trash2Icon className="size-4 text-destructive" /></Button>} onConfirm={() => handleDelete(sl.id)} />
+              </div>
+            </div>
+          ))}
+        </div>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border">
           <Table>
@@ -165,14 +225,14 @@ function ShortlinksAdmin() {
       />
 
       <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setEditing(undefined) }}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogContent>
           <DialogHeader><DialogTitle>{editing ? 'Edit shortlink' : 'Shortlink baru'}</DialogTitle></DialogHeader>
           <ShortlinkForm key={editing?.id ?? 'new'} item={editing} onDone={() => setOpen(false)} />
         </DialogContent>
       </Dialog>
 
       <Dialog open={qrOpen} onOpenChange={setQrOpen}>
-        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Kode QR</DialogTitle>
           </DialogHeader>

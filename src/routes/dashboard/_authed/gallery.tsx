@@ -12,8 +12,12 @@ import { FormField, fieldErrors } from '#/components/dashboard/form-field.tsx'
 import { Pagination } from '#/components/pagination.tsx'
 import { Button } from '#/components/ui/button.tsx'
 import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
-} from '#/components/ui/dialog.tsx'
+  ResponsiveDialog as Dialog,
+  ResponsiveDialogContent as DialogContent,
+  ResponsiveDialogFooter as DialogFooter,
+  ResponsiveDialogHeader as DialogHeader,
+  ResponsiveDialogTitle as DialogTitle,
+} from '#/components/dashboard/responsive-dialog.tsx'
 import { Input } from '#/components/ui/input.tsx'
 import type { GalleryItem } from '#/db/schema.ts'
 import { deleteGalleryItem, listGallery, saveGalleryItem } from '#/server/admin.ts'
@@ -105,7 +109,7 @@ function GalleryAdmin() {
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {items.map((item) => (
-            <div key={item.id} className="overflow-hidden rounded-xl border border-border bg-card">
+            <div key={item.id} className="overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-md">
               <img src={item.image} alt={item.caption} className="aspect-3/2 w-full object-cover" />
               <div className="p-3">
                 <div className="font-mono text-[0.65rem] tracking-wide text-brand-orange uppercase">{item.tag}</div>
