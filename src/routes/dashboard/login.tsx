@@ -14,7 +14,12 @@ const loginSchema = z.object({
   password: z.string().min(1, 'Password wajib diisi'),
 })
 
-const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as string
+// Site keys are public by design (meant to sit in client-side HTML), so a
+// baked-in fallback is safe — same reasoning as the Hyperdrive id in
+// vite.config.ts. Override at build time with VITE_TURNSTILE_SITE_KEY.
+const TURNSTILE_SITE_KEY =
+  (import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined) ||
+  '0x4AAAAAAD4kWRDGFvIFsJwT'
 
 export const Route = createFileRoute('/dashboard/login')({
   component: Login,
