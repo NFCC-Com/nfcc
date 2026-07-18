@@ -15,10 +15,14 @@ function displayHandle(url: string): string {
   return url.replace(/^https?:\/\//, '').replace(/\/$/, '')
 }
 
+function displayPath(url: string): string {
+  return displayHandle(url).replace(/^[^/]+\//, '')
+}
+
 export function Footer({ settings }: { settings: SiteSettings }) {
   const socials = [
     {
-      label: `@${displayHandle(settings.instagram).replace(/^instagram\.com\//, '')}`,
+      label: `@${displayPath(settings.instagram)}`,
       href: settings.instagram,
       icon: InstagramIcon,
     },
@@ -33,10 +37,10 @@ export function Footer({ settings }: { settings: SiteSettings }) {
       icon: TerminalIcon,
     },
     ...(settings.discord
-      ? [{ label: displayHandle(settings.discord), href: settings.discord, icon: DiscordIcon }]
+      ? [{ label: displayPath(settings.discord), href: settings.discord, icon: DiscordIcon }]
       : []),
     ...(settings.github
-      ? [{ label: displayHandle(settings.github), href: settings.github, icon: GithubIcon }]
+      ? [{ label: displayPath(settings.github), href: settings.github, icon: GithubIcon }]
       : []),
   ]
 
@@ -47,7 +51,7 @@ export function Footer({ settings }: { settings: SiteSettings }) {
         alt=""
         className="absolute inset-0 h-full w-full object-cover opacity-60"
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-brand-navy via-brand-navy/65 to-brand-navy" />
+      <div className="absolute inset-0 bg-linear-to-b from-brand-navy via-brand-navy/65 to-brand-navy" />
       <div className="page-wrap relative py-14">
         <div className="grid gap-10 md:grid-cols-[1.3fr_1fr_1fr]">
           <div>
