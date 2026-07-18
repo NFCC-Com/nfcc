@@ -6,12 +6,15 @@ import { z } from 'zod'
 import { Button } from '#/components/ui/button.tsx'
 import { Input } from '#/components/ui/input.tsx'
 import { FormField, fieldErrors } from '#/components/dashboard/form-field.tsx'
+import { TurnstileWidget, type TurnstileWidgetHandle } from '#/components/turnstile-widget.tsx'
 import { signIn } from '#/server/admin.ts'
 
 const loginSchema = z.object({
   email: z.string().email('Email yang valid ya'),
   password: z.string().min(1, 'Password wajib diisi'),
 })
+
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as string
 
 export const Route = createFileRoute('/dashboard/login')({
   component: Login,
@@ -21,13 +24,21 @@ export const Route = createFileRoute('/dashboard/login')({
 function Login() {
   const router = useRouter()
   const [error, setError] = React.useState<string | null>(null)
+  const [turnstileToken, setTurnstileToken] = React.useState('')
+  const turnstileRef = React.useRef<TurnstileWidgetHandle>(null)
 
   const form = useForm({
     defaultValues: { email: '', password: '' },
     validators: { onChange: loginSchema },
     onSubmit: async ({ value }) => {
       setError(null)
-      const result = await signIn({ data: value })
+      if (!turnstileToken) {
+        setError('Verifikasi captcha wajib diisi')
+        return
+      }
+      const result = await signIn({ data: { ...value, turnstileToken } })
+      turnstileRef.current?.reset()
+      setTurnstileToken('')
       if (!result.ok) {
         setError(result.error)
         return
@@ -86,9 +97,19 @@ function Login() {
             )}
           </form.Field>
 
+          <TurnstileWidget
+            ref={turnstileRef}
+            siteKey={TURNSTILE_SITE_KEY}
+            onToken={setTurnstileToken}
+            onExpire={() => setTurnstileToken('')}
+          />
+
           {error && <p className="text-sm text-destructive">{error}</p>}
 
-          <Button type="submit" disabled={form.state.isSubmitting}>
+          <Button
+            type="submit"
+            disabled={form.state.isSubmitting || !turnstileToken}
+          >
             {form.state.isSubmitting ? 'Login\u2026' : 'Login'}
           </Button>
         </form>

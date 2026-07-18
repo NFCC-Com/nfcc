@@ -1,4 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
+import { getRequestIP } from '@tanstack/react-start/server'
 import { and, asc, count, desc, eq, isNull, sql } from 'drizzle-orm'
 import { z } from 'zod'
 
@@ -17,6 +18,7 @@ import { renderMarkdown } from '#/lib/markdown.ts'
 import { formatPeriode, parsePeriodeFilter } from '#/lib/periode.ts'
 import { generateCode, isSafeTargetUrl, isValidCode } from '#/lib/shortlink.ts'
 import { getSsrClient, getSupabaseAdminClient } from '#/lib/supabase/server.ts'
+import { verifyTurnstile } from '#/lib/turnstile.ts'
 
 function slugify(input: string): string {
   return input
@@ -31,12 +33,21 @@ function slugify(input: string): string {
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
 export const signIn = createServerFn({ method: 'POST' })
-  .validator((data: { email: string; password: string }) =>
+  .validator((data: { email: string; password: string; turnstileToken: string }) =>
     z
-      .object({ email: z.string().email(), password: z.string().min(1) })
+      .object({
+        email: z.string().email(),
+        password: z.string().min(1),
+        turnstileToken: z.string().min(1, 'Verifikasi captcha wajib diisi'),
+      })
       .parse(data),
   )
   .handler(async ({ data }) => {
+    const verified = await verifyTurnstile(data.turnstileToken, getRequestIP())
+    if (!verified) {
+      return { ok: false as const, error: 'Verifikasi captcha gagal, coba lagi.' }
+    }
+
     const supabase = getSsrClient()
     const { error } = await supabase.auth.signInWithPassword(data)
     if (error) return { ok: false as const, error: error.message }
