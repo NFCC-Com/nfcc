@@ -14,7 +14,10 @@ const config = defineConfig({
   resolve: { tsconfigPaths: true },
   plugins: [
     devtools(),
-    nitro({ rollupConfig: { external: [/^@sentry\//] } }),
+    nitro({
+      rollupConfig: { external: [/^@sentry\//] },
+      cloudflare: { wrangler: { name: 'nfcc' } },
+    }),
     tailwindcss(),
     tanstackStart(),
     viteReact(),
