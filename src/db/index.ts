@@ -10,20 +10,46 @@ type CloudflareRequest = Request & {
   runtime?: { cloudflare?: { env?: { HYPERDRIVE?: { connectionString?: string } } } }
 }
 
-let instance: Db | undefined
+function buildDb(connectionString: string): Db {
+  // Supabase's transaction pooler (and Hyperdrive, which also pools in
+  // transaction mode) does not support prepared statements.
+  const client = postgres(connectionString, { prepare: false })
+  return drizzle(client, { schema })
+}
 
-// On Cloudflare Workers, raw TCP to Supabase's pooler over the polyfilled
-// node:net/tls can hang indefinitely (SSL upgrade never completes), so route
-// through Hyperdrive instead when its binding is present. Everywhere else
-// (Vercel, local dev) falls back to DATABASE_URL.
-function resolveConnectionString(): string {
+// Cloudflare Workers can keep a warm isolate around across many unrelated
+// requests. If a cached client's TCP connection ever wedges (the polyfilled
+// node:net/tls over Workers sockets can hang), caching it at module scope
+// would poison every later request on that isolate. So on Workers we key one
+// client per request instead (Cloudflare's own Hyperdrive guidance: creating
+// a client per request is cheap since Hyperdrive pools the real connection
+// server-side) — it's discarded once the request's Request object is GC'd.
+const perRequest = new WeakMap<Request, Db>()
+
+// Outside Workers (Vercel, local dev) there's no isolate-reuse hazard and no
+// per-request Request object to key off reliably, so a single long-lived
+// client is simpler and avoids reconnecting on every call.
+let nodeInstance: Db | undefined
+
+function getDb(): Db {
+  let req: CloudflareRequest | undefined
   try {
-    const req = getRequest() as CloudflareRequest
-    const hyperdriveUrl = req.runtime?.cloudflare?.env?.HYPERDRIVE?.connectionString
-    if (hyperdriveUrl) return hyperdriveUrl
+    req = getRequest() as CloudflareRequest
   } catch {
-    // Not inside a request (drizzle-kit, seed script) — fall through.
+    req = undefined
   }
+
+  const hyperdriveUrl = req?.runtime?.cloudflare?.env?.HYPERDRIVE?.connectionString
+  if (req && hyperdriveUrl) {
+    let db = perRequest.get(req)
+    if (!db) {
+      db = buildDb(hyperdriveUrl)
+      perRequest.set(req, db)
+    }
+    return db
+  }
+
+  if (nodeInstance) return nodeInstance
 
   const connectionString = process.env.DATABASE_URL
   if (!connectionString) {
@@ -31,20 +57,8 @@ function resolveConnectionString(): string {
       'DATABASE_URL is not set. Copy .env.example to .env and fill in your Supabase Postgres connection string.',
     )
   }
-  return connectionString
-}
-
-// Lazily connect on first query instead of at module load. Cloudflare Workers
-// only expose env vars/bindings and allow socket creation inside the request
-// lifecycle, so reading env at import time would break on that runtime.
-function getDb(): Db {
-  if (instance) return instance
-
-  // Supabase's transaction pooler (and Hyperdrive, which also pools in
-  // transaction mode) does not support prepared statements.
-  const client = postgres(resolveConnectionString(), { prepare: false })
-  instance = drizzle(client, { schema })
-  return instance
+  nodeInstance = buildDb(connectionString)
+  return nodeInstance
 }
 
 export const db: Db = new Proxy({} as Db, {
