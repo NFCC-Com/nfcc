@@ -27,6 +27,25 @@ export const Route = createFileRoute('/about')({
   }),
 })
 
+const MISI = [
+  {
+    title: 'Pendidikan & Mentoring',
+    body: 'Menyediakan ruang belajar bareng dari dasar dan mengkurasi resource berkualitas, memastikan setiap anggota berkembang tanpa ada yang tertinggal.',
+  },
+  {
+    title: 'Prestasi & Kompetensi',
+    body: 'Mendorong partisipasi aktif dalam CTF dan eksplorasi Bug Bounty, mengasah skill teknis dan mental juara yang siap bersaing.',
+  },
+  {
+    title: 'Jejaring Eksternal',
+    body: 'Membangun relasi strategis dengan komunitas siber luar kampus untuk memperluas wawasan, referensi belajar, dan nama NFCC.',
+  },
+  {
+    title: 'Edukasi Sosial',
+    body: 'Memanfaatkan media sosial untuk membagikan konten literasi keamanan digital yang ringan dan aplikatif, wujud kepedulian ke mahasiswa dan masyarakat umum.',
+  },
+]
+
 function About() {
   const { team, timeline, settings } = Route.useLoaderData()
   // Rows arrive pre-sorted newest periode first (see getTeam), so distinct-in-
@@ -54,29 +73,31 @@ function About() {
       </section>
 
       <section className="page-wrap py-20">
-        <div className="grid gap-12 md:grid-cols-2">
-          <div>
-            <div className="eyebrow">Misi</div>
-            <h2 className="display-title mt-2 text-2xl font-semibold">
-              Kenapa kita ada
-            </h2>
-            <p className="mt-3 text-muted-foreground">
-              Ngasih mahasiswa STT Terpadu Nurul Fikri jalur terstruktur dan
-              hands-on ke dunia cybersecurity — ngejembatanin celah antara teori
-              kelas sama cara kerja serangan dan pertahanan di dunia nyata.
-            </p>
-          </div>
-          <div>
-            <div className="eyebrow">Visi</div>
-            <h2 className="display-title mt-2 text-2xl font-semibold">
-              Arah yang dituju
-            </h2>
-            <p className="mt-3 text-muted-foreground">
-              Jadi komunitas yang cukup kuat buat ngejalanin platform CTF
-              sendiri, mentori anggota baru jadi spesialis, dan ngewakilin
-              kampus di kompetisi keamanan nasional.
-            </p>
-          </div>
+        <div className="eyebrow">Visi</div>
+        <h2 className="display-title mt-2 max-w-2xl text-2xl font-semibold sm:text-3xl">
+          Arah yang dituju
+        </h2>
+        <p className="mt-3 max-w-2xl text-muted-foreground">
+          Menjadi komunitas mahasiswa unggulan di bidang keamanan siber yang
+          kolaboratif dan suportif — wadah tumbuh bersama untuk mencetak
+          talenta berprestasi yang berkontribusi nyata bagi literasi digital
+          masyarakat.
+        </p>
+
+        <div className="eyebrow mt-16">Misi</div>
+        <h2 className="display-title mt-2 text-2xl font-semibold sm:text-3xl">
+          Kenapa kita ada
+        </h2>
+        <div className="mt-8 grid gap-6 sm:grid-cols-2">
+          {MISI.map((item) => (
+            <div
+              key={item.title}
+              className="rounded-xl border border-border bg-card p-6 transition-shadow hover:shadow-md"
+            >
+              <h3 className="font-semibold">{item.title}</h3>
+              <p className="mt-2 text-muted-foreground">{item.body}</p>
+            </div>
+          ))}
         </div>
       </section>
 
