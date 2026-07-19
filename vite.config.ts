@@ -8,9 +8,6 @@ import tailwindcss from '@tailwindcss/vite'
 import { nitro } from 'nitro/vite'
 
 const config = defineConfig({
-  server: {
-    allowedHosts: ["monit.tako.build"],
-  },
   resolve: { tsconfigPaths: true },
   plugins: [
     devtools(),
