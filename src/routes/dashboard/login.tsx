@@ -19,7 +19,7 @@ const loginSchema = z.object({
 // vite.config.ts. Override at build time with VITE_TURNSTILE_SITE_KEY.
 const TURNSTILE_SITE_KEY =
   (import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined) ||
-  '0x4AAAAAAD4kWRDGFvIFsJwT'
+  '0x4AAAAAAD4-AT5yFHKISQGW'
 
 export const Route = createFileRoute('/dashboard/login')({
   component: Login,
