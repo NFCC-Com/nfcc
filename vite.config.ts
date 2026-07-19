@@ -23,7 +23,7 @@ const config = defineConfig({
           hyperdrive: [
             {
               binding: 'HYPERDRIVE',
-              id: process.env.CF_HYPERDRIVE_ID || 'daca07a30b8841f6bee2ee0a5e758c21',
+              id: process.env.CF_HYPERDRIVE_ID || 'efb618f46eea4593b6edf30b8cc2e0e0',
               localConnectionString: process.env.DATABASE_URL,
             },
           ],
