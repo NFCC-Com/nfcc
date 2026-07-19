@@ -27,7 +27,7 @@ CREATE TABLE "site_settings" (
 	"id" integer PRIMARY KEY DEFAULT 1 NOT NULL,
 	"instagram" text DEFAULT 'https://instagram.com/nfcc.id' NOT NULL,
 	"website" text DEFAULT 'https://nfcc.my.id' NOT NULL,
-	"ctf_url" text DEFAULT 'https://ctf.nfcd.id' NOT NULL,
+	"ctf_url" text DEFAULT 'https://ctf.nfcc.my.id' NOT NULL,
 	"contact_email" text DEFAULT 'contact@nfcc.my.id' NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );

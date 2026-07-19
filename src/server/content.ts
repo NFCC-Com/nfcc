@@ -135,7 +135,7 @@ export const getSettings = createServerFn({ method: 'GET' }).handler(
         id: 1,
         instagram: 'https://instagram.com/nfcc.id',
         website: 'https://nfcc.my.id',
-        ctfUrl: 'https://ctf.nfcd.id',
+        ctfUrl: 'https://ctf.nfcc.my.id',
         discord: '',
         github: '',
         contactEmail: 'contact@nfcc.my.id',

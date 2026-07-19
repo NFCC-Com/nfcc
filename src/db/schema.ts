@@ -98,7 +98,7 @@ export const siteSettings = pgTable('site_settings', {
     .notNull()
     .default('https://instagram.com/nfcc.id'),
   website: text('website').notNull().default('https://nfcc.my.id'),
-  ctfUrl: text('ctf_url').notNull().default('https://ctf.nfcd.id'),
+  ctfUrl: text('ctf_url').notNull().default('https://ctf.nfcc.my.id'),
   discord: text('discord').notNull().default(''),
   github: text('github').notNull().default(''),
   contactEmail: text('contact_email').notNull().default('contact@nfcc.my.id'),
