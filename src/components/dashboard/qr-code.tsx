@@ -42,48 +42,56 @@ function renderQrToCanvas(
   logoSize: number,
   bgPadding: number,
   bgOpacity: number,
-): void {
+): Promise<void> {
   const dpr = window.devicePixelRatio || 2
   const px = size * dpr
 
-  QRCodeLib.toCanvas(canvas, url, {
-    width: px,
-    margin: 0,
-    color: { dark: fg, light: bg },
-    errorCorrectionLevel: 'H',
-  }, () => {
-    const ctx = canvas.getContext('2d')!
-    const cw = canvas.width
-    const ch = canvas.height
-    const cx = cw / 2
-    const cy = ch / 2
+  return new Promise((resolve, reject) => {
+    QRCodeLib.toCanvas(canvas, url, {
+      width: px,
+      margin: 0,
+      color: { dark: fg, light: bg },
+      errorCorrectionLevel: 'H',
+    }, (err?: Error | null) => {
+      if (err) {
+        reject(err)
+        return
+      }
 
-    const half = Math.min(cw, ch) / 2
-    const logoRadius = half * (logoSize / 100)
-    const bpad = half * (bgPadding / 100)
+      const ctx = canvas.getContext('2d')!
+      const cw = canvas.width
+      const ch = canvas.height
+      const cx = cw / 2
+      const cy = ch / 2
 
-    ctx.save()
+      const half = Math.min(cw, ch) / 2
+      const logoRadius = half * (logoSize / 100)
+      const bpad = half * (bgPadding / 100)
 
-    if (bpad > 0.5) {
-      ctx.beginPath()
-      ctx.arc(cx, cy, logoRadius + bpad + 2, 0, Math.PI * 2)
-      ctx.fillStyle = hexToRgba(bg, bgOpacity / 100 * 0.95)
-      ctx.fill()
+      ctx.save()
 
-      ctx.beginPath()
-      ctx.arc(cx, cy, logoRadius + bpad, 0, Math.PI * 2)
-      ctx.fillStyle = hexToRgba(bg, bgOpacity / 100)
-      ctx.fill()
-    }
+      if (bpad > 0.5) {
+        ctx.beginPath()
+        ctx.arc(cx, cy, logoRadius + bpad + 2, 0, Math.PI * 2)
+        ctx.fillStyle = hexToRgba(bg, bgOpacity / 100 * 0.95)
+        ctx.fill()
 
-    const logoSize2x = logoRadius * 1.6
+        ctx.beginPath()
+        ctx.arc(cx, cy, logoRadius + bpad, 0, Math.PI * 2)
+        ctx.fillStyle = hexToRgba(bg, bgOpacity / 100)
+        ctx.fill()
+      }
 
-    loadLogoImage().then((img) => {
-      const ratio = Math.min(logoSize2x / img.width, logoSize2x / img.height)
-      const dw = img.width * ratio
-      const dh = img.height * ratio
-      ctx.drawImage(img, cx - dw / 2, cy - dh / 2, dw, dh)
-      ctx.restore()
+      const logoSize2x = logoRadius * 1.6
+
+      loadLogoImage().then((img) => {
+        const ratio = Math.min(logoSize2x / img.width, logoSize2x / img.height)
+        const dw = img.width * ratio
+        const dh = img.height * ratio
+        ctx.drawImage(img, cx - dw / 2, cy - dh / 2, dw, dh)
+        ctx.restore()
+        resolve()
+      }, reject)
     })
   })
 }
@@ -107,7 +115,7 @@ async function downloadPng(
   filename: string,
 ) {
   const offscreen = document.createElement('canvas')
-  renderQrToCanvas(offscreen, url, size, fg, bg, logoSize, bgPadding, bgOpacity)
+  await renderQrToCanvas(offscreen, url, size, fg, bg, logoSize, bgPadding, bgOpacity)
   const link = document.createElement('a')
   link.download = `${filename}.png`
   link.href = offscreen.toDataURL('image/png')
